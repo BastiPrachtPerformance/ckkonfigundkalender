@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { headers } from "next/headers";
+import { Experience } from "./_components/Experience";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -48,7 +49,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="de">
-      <body className={`${display.variable} ${sans.variable}`}>{children}</body>
+      <body className={`${display.variable} ${sans.variable}`}>
+        <Experience />
+        {children}
+      </body>
     </html>
   );
 }
