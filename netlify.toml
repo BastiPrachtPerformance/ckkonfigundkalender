@@ -20,6 +20,12 @@
   to = "/.netlify/functions/availability"
   status = 200
 
+# Oeffentlicher, nicht-sensibler Systemstatus fuer Deploy-Pruefungen
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
 # Admin: Login
 [[redirects]]
   from = "/api/admin/login"
