@@ -126,6 +126,26 @@ function loadPricing() {
   return data;
 }
 
+function snapshotRequestConfig(config, pricing) {
+  if (!config || typeof config !== 'object') return null;
+  const copy = { ...config }, location = pricing?.locations?.[copy.hall], hall = pricing?.halls?.[copy.hall];
+  if (!location) return copy;
+  const guests = Number(copy.guestCount) || 0, extraKeys = Array.isArray(copy.extras) ? copy.extras : [];
+  const item = (group, key) => location[group]?.[key], amount = entry => (Number(entry?.price) || 0) + (Number(entry?.perGuest) || 0) * guests;
+  const dayLabels = { friday: 'Freitag', saturday: 'Samstag', sunday: 'Sonntag', weekday: 'Montag bis Donnerstag' }, priceItems = [];
+  copy.hallName = copy.hallName || hall?.name || copy.hall;
+  copy.dayLabel = copy.dayLabel || dayLabels[copy.dayKey] || copy.dayKey;
+  copy.menuLabel = copy.menuLabel || item('menu', copy.menu)?.label || copy.menu;
+  copy.drinksLabel = copy.drinksLabel || item('drinks', copy.drinks)?.label || copy.drinks;
+  copy.midnightLabel = copy.midnightLabel || item('midnight', copy.midnight)?.label || copy.midnight;
+  copy.extraLabels = extraKeys.map(key => item('extras', key)?.label || key);
+  priceItems.push({ label: `${copy.hallName || 'Location'} · ${copy.dayLabel || ''}`, amount: Number(location.baseByDay?.[copy.dayKey]) || 0 });
+  [['menu', copy.menu], ['drinks', copy.drinks], ['midnight', copy.midnight]].forEach(([group, key]) => { const entry = item(group, key); if (entry) priceItems.push({ label: entry.label || key, amount: amount(entry) }); });
+  extraKeys.forEach(key => { const entry = item('extras', key); if (entry) priceItems.push({ label: entry.label || key, amount: amount(entry) }); });
+  copy.priceItems = priceItems;
+  return copy;
+}
+
 if (!fs.existsSync(REQUESTS_FILE)) writeJson(REQUESTS_FILE, []);
 
 function loadAvailability() {
@@ -216,7 +236,7 @@ app.post('/api/requests', (req, res) => {
     return res.status(400).json({ error: 'Name und E-Mail sind erforderlich.' });
   }
 
-  const requests = readJson(REQUESTS_FILE, []);
+  const requests = readJson(REQUESTS_FILE, []), pricing = loadPricing();
   const newRequest = {
     id: crypto.randomUUID(),
     name: String(name).slice(0, 200),
@@ -224,7 +244,7 @@ app.post('/api/requests', (req, res) => {
     phone: String(phone || '').slice(0, 100),
     date: String(date || '').slice(0, 50),
     message: String(message || '').slice(0, 2000),
-    config: config || null,
+    config: snapshotRequestConfig(config, pricing),
     configCode: configCode || null,
     total: Number(total) || 0,
     status: 'neu',

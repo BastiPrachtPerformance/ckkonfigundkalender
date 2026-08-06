@@ -1,5 +1,5 @@
 // POST /api/requests – öffentlich, neue Anfrage speichern.
-const { getRequests, saveRequests, reserveWeddingDate, releaseWeddingDate, prepareStorage, getStorageInfo, json, options } = require('../lib/shared');
+const { getPricing, getRequests, saveRequests, snapshotRequestConfig, reserveWeddingDate, releaseWeddingDate, prepareStorage, getStorageInfo, json, options } = require('../lib/shared');
 
 exports.handler = async (event) => {
   prepareStorage(event);
@@ -22,7 +22,7 @@ exports.handler = async (event) => {
       return json(400, { error: 'Name und E-Mail sind erforderlich.' });
     }
 
-    const requests = await getRequests();
+    const [requests, pricing] = await Promise.all([getRequests(), getPricing()]);
     const id =
       (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() :
       'req-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
@@ -34,7 +34,7 @@ exports.handler = async (event) => {
       phone: String(phone || '').slice(0, 100),
       date: String(date || '').slice(0, 50),
       message: String(message || '').slice(0, 2000),
-      config: config || null,
+      config: snapshotRequestConfig(config, pricing),
       configCode: configCode || null,
       total: Number(total) || 0,
       status: 'neu',

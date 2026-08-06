@@ -225,6 +225,41 @@ async function savePricing(data) {
   await store().set(PRICING_KEY, JSON.stringify(data));
 }
 
+function snapshotRequestConfig(config, pricing) {
+  if (!config || typeof config !== 'object') return null;
+  const copy = { ...config };
+  const location = pricing && pricing.locations && pricing.locations[copy.hall];
+  const hall = pricing && pricing.halls && pricing.halls[copy.hall];
+  if (!location) return copy;
+
+  const guests = Number(copy.guestCount) || 0;
+  const extraKeys = Array.isArray(copy.extras) ? copy.extras : [];
+  const item = (group, key) => location[group] && location[group][key];
+  const amount = (entry) => (Number(entry && entry.price) || 0) + (Number(entry && entry.perGuest) || 0) * guests;
+  const priceItems = [];
+  const base = Number(location.baseByDay && location.baseByDay[copy.dayKey]) || 0;
+  const dayLabels = { friday: 'Freitag', saturday: 'Samstag', sunday: 'Sonntag', weekday: 'Montag bis Donnerstag' };
+
+  copy.hallName = copy.hallName || (hall && hall.name) || copy.hall;
+  copy.dayLabel = copy.dayLabel || dayLabels[copy.dayKey] || copy.dayKey;
+  copy.menuLabel = copy.menuLabel || (item('menu', copy.menu) && item('menu', copy.menu).label) || copy.menu;
+  copy.drinksLabel = copy.drinksLabel || (item('drinks', copy.drinks) && item('drinks', copy.drinks).label) || copy.drinks;
+  copy.midnightLabel = copy.midnightLabel || (item('midnight', copy.midnight) && item('midnight', copy.midnight).label) || copy.midnight;
+  copy.extraLabels = extraKeys.map((key) => (item('extras', key) && item('extras', key).label) || key);
+
+  priceItems.push({ label: `${copy.hallName || 'Location'} · ${copy.dayLabel || ''}`, amount: base });
+  [['menu', copy.menu], ['drinks', copy.drinks], ['midnight', copy.midnight]].forEach(([group, key]) => {
+    const entry = item(group, key);
+    if (entry) priceItems.push({ label: entry.label || key, amount: amount(entry) });
+  });
+  extraKeys.forEach((key) => {
+    const entry = item('extras', key);
+    if (entry) priceItems.push({ label: entry.label || key, amount: amount(entry) });
+  });
+  copy.priceItems = priceItems;
+  return copy;
+}
+
 async function getRequests() {
   const data = parseJson(await store().get(REQUESTS_KEY), []);
   return Array.isArray(data) ? data : [];
@@ -407,6 +442,7 @@ module.exports = {
   DEFAULT_PRICING,
   getPricing,
   savePricing,
+  snapshotRequestConfig,
   getRequests,
   saveRequests,
   getAvailability,
