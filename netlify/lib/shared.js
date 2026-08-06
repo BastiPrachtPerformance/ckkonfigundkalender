@@ -5,13 +5,24 @@ const LEGACY_AVAILABILITY = require('./legacy-availability');
 
 let blobsStore = null;
 let blobLoadError = null;
+let blobsInitialized = false;
 
-try {
-  const { getStore } = require('@netlify/blobs');
-  blobsStore = getStore('ck-konfigurator');
-} catch (error) {
-  blobLoadError = error;
-  console.warn('@netlify/blobs ist nicht verfuegbar.', error.message);
+// Netlify stellt den Blobs-Kontext erst beim Aufruf einer Function bereit.
+// Deshalb darf getStore() nicht schon beim Laden dieses Moduls ausgefuehrt
+// werden, sondern erst innerhalb der eigentlichen Anfrage.
+function initializeBlobs() {
+  if (blobsInitialized) return blobsStore;
+  blobsInitialized = true;
+
+  try {
+    const { getStore } = require('@netlify/blobs');
+    blobsStore = getStore('ck-konfigurator');
+  } catch (error) {
+    blobLoadError = error;
+    console.warn('@netlify/blobs ist nicht verfuegbar.', error.message);
+  }
+
+  return blobsStore;
 }
 
 const DATA_DIR = path.resolve(__dirname, '..', '..', 'data');
@@ -50,6 +61,8 @@ function isNetlifyRuntime() {
 }
 
 function getStorageInfo() {
+  initializeBlobs();
+
   if (blobsStore) {
     return {
       type: 'netlify-blobs',
@@ -75,6 +88,8 @@ function getStorageInfo() {
 }
 
 function store() {
+  initializeBlobs();
+
   if (blobsStore) return blobsStore;
   if (!isNetlifyRuntime()) return fileStore;
   return memoryStore;
