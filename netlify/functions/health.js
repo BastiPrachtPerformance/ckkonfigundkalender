@@ -1,7 +1,8 @@
 // GET /api/health - nicht-sensibler Status des aktuellen Deploys.
-const { getStorageInfo, json, options } = require('../lib/shared');
+const { prepareStorage, getStorageInfo, json, options } = require('../lib/shared');
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
   if (event.httpMethod !== 'GET') return json(405, { error: 'Method not allowed' });
 

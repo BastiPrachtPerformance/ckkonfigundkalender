@@ -25,6 +25,23 @@ function initializeBlobs() {
   return blobsStore;
 }
 
+function prepareStorage(event) {
+  if (event && event.blobs) {
+    try {
+      const { connectLambda } = require('@netlify/blobs');
+      connectLambda(event);
+      blobsInitialized = false;
+      blobsStore = null;
+      blobLoadError = null;
+    } catch (error) {
+      blobLoadError = error;
+      console.warn('Netlify Blobs Lambda-Kontext konnte nicht geladen werden.', error.message);
+    }
+  }
+
+  initializeBlobs();
+}
+
 const DATA_DIR = path.resolve(__dirname, '..', '..', 'data');
 const FILES = {
   pricing: path.join(DATA_DIR, 'pricing.json'),
@@ -398,6 +415,7 @@ module.exports = {
   reserveWeddingDate,
   setWeddingDateStatus,
   releaseWeddingDate,
+  prepareStorage,
   getStorageInfo,
   json,
   options,

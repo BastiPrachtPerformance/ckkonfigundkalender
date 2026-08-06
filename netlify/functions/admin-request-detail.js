@@ -1,10 +1,11 @@
 // PATCH/DELETE /api/admin/requests/:id – Admin: Status ändern oder Anfrage löschen.
 // Wird über netlify.toml Redirect aufgerufen; die id wird in event.queryStringParameters.id übergeben.
-const { getRequests, saveRequests, getStorageInfo, json, options, isAdmin, unauthorized } = require('../lib/shared');
+const { getRequests, saveRequests, prepareStorage, getStorageInfo, json, options, isAdmin, unauthorized } = require('../lib/shared');
 
 const ALLOWED_STATUS = new Set(['neu', 'kontaktiert', 'bestaetigt', 'bestätigt', 'abgelehnt']);
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
   if (!isAdmin(event)) return unauthorized();
 

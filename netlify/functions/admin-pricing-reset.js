@@ -1,7 +1,8 @@
 // POST /api/admin/pricing/reset – Admin: Preise auf Standard zurücksetzen.
-const { DEFAULT_PRICING, savePricing, getStorageInfo, json, options, isAdmin, unauthorized } = require('../lib/shared');
+const { DEFAULT_PRICING, savePricing, prepareStorage, getStorageInfo, json, options, isAdmin, unauthorized } = require('../lib/shared');
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
   if (!isAdmin(event)) return unauthorized();
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });

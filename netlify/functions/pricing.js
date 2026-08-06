@@ -1,7 +1,8 @@
 // GET /api/pricing – öffentlich, liefert die aktuelle Preisliste.
-const { getPricing, json, options } = require('../lib/shared');
+const { getPricing, prepareStorage, json, options } = require('../lib/shared');
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
   if (event.httpMethod !== 'GET') return json(405, { error: 'Method not allowed' });
 

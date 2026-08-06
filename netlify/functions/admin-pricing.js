@@ -1,7 +1,8 @@
 // GET/PUT /api/admin/pricing – Admin: Preise abrufen oder vollständig ersetzen.
-const { getPricing, savePricing, getStorageInfo, json, options, isAdmin, unauthorized } = require('../lib/shared');
+const { getPricing, savePricing, prepareStorage, getStorageInfo, json, options, isAdmin, unauthorized } = require('../lib/shared');
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
 
   if (!isAdmin(event)) return unauthorized();

@@ -1,7 +1,8 @@
 // GET /api/availability – öffentliche Hochzeitsbelegung ohne Kontaktdaten.
-const { getAvailability, availabilityRows, json, options } = require('../lib/shared');
+const { getAvailability, availabilityRows, prepareStorage, json, options } = require('../lib/shared');
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
   if (event.httpMethod !== 'GET') return json(405, { error: 'Method not allowed' });
   try {

@@ -1,7 +1,8 @@
 // POST /api/admin/login – Admin-Login, liefert Token bei korrektem Passwort.
-const { json, options, makeToken, ADMIN_PASSWORD, getStorageInfo, TOKEN_TTL_MS } = require('../lib/shared');
+const { json, options, makeToken, ADMIN_PASSWORD, prepareStorage, getStorageInfo, TOKEN_TTL_MS } = require('../lib/shared');
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
 

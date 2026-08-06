@@ -1,7 +1,8 @@
 // POST /api/requests – öffentlich, neue Anfrage speichern.
-const { getRequests, saveRequests, reserveWeddingDate, releaseWeddingDate, getStorageInfo, json, options } = require('../lib/shared');
+const { getRequests, saveRequests, reserveWeddingDate, releaseWeddingDate, prepareStorage, getStorageInfo, json, options } = require('../lib/shared');
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
 

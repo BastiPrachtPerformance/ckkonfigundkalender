@@ -4,6 +4,7 @@ const {
   availabilityRows,
   setWeddingDateStatus,
   releaseWeddingDate,
+  prepareStorage,
   getStorageInfo,
   json,
   options,
@@ -12,6 +13,7 @@ const {
 } = require('../lib/shared');
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
   if (!isAdmin(event)) return unauthorized();
   try {

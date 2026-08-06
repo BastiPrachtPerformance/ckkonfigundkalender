@@ -1,6 +1,7 @@
-const { json, options, isAdmin, unauthorized, getStorageInfo, ADMIN_PASSWORD, TOKEN_TTL_MS } = require('../lib/shared');
+const { json, options, isAdmin, unauthorized, prepareStorage, getStorageInfo, ADMIN_PASSWORD, TOKEN_TTL_MS } = require('../lib/shared');
 
 exports.handler = async (event) => {
+  prepareStorage(event);
   if (event.httpMethod === 'OPTIONS') return options();
   if (event.httpMethod !== 'GET') return json(405, { error: 'Method not allowed' });
   if (!isAdmin(event)) return unauthorized();
