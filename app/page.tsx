@@ -10,14 +10,14 @@ export default function Home() {
         <div className="home-hero-overlay" />
         <div className="hero-ornament" aria-hidden="true">C</div>
         <div className="home-hero-copy">
-          <p className="kicker">Zwei Locations / Bergkamen</p>
+          <p className="kicker">Zwei Säle / Bergkamen</p>
           <h1>Ein Ort für<br /><em>das Unvergessliche.</em></h1>
           <div className="hero-meta">
             <p>Hochzeiten. Große Feiern.<br />Momente, die bleiben.</p>
             <a className="line-button light" href="/kontakt">Gespräch vereinbaren <span>↗</span></a>
           </div>
         </div>
-        <div className="hero-side-note"><span>Est.</span><b>CK</b><span>Bergkamen</span></div>
+        <div className="hero-side-note"><span>Seit</span><b>CK</b><span>Bergkamen</span></div>
       </section>
 
       <section className="manifesto">
@@ -34,20 +34,20 @@ export default function Home() {
           <img src={images.eventcenter} alt="Großer Festsaal des CK Eventcenters" />
           <div className="portal-shade" />
           <span className="portal-index">01</span>
-          <div className="portal-copy"><p>Glanzvoll / Großzügig</p><h2>CK<br />Eventcenter</h2><span>Location entdecken ↗</span></div>
+          <div className="portal-copy"><p>Glanzvoll / Großzügig</p><h2>CK<br />Eventcenter</h2><span>Saal entdecken ↗</span></div>
         </a>
         <a className="portal" href="/garden">
           <img src={images.garden} alt="CK Garden mit stilvoller Dekoration" />
           <div className="portal-shade" />
           <span className="portal-index">02</span>
-          <div className="portal-copy"><p>Natur / Stil / Leichtigkeit</p><h2>CK<br /><em>Garden</em></h2><span>Location entdecken ↗</span></div>
+          <div className="portal-copy"><p>Natur / Stil / Leichtigkeit</p><h2>CK<br /><em>Garden</em></h2><span>Garten entdecken ↗</span></div>
         </a>
       </section>
 
       <section className="statement-band">
         <div className="marquee-track">
-          <span>Celebrate</span><span className="star">✦</span><em>Love</em><span className="star">✦</span><span>Remember</span><span className="star">✦</span>
-          <span aria-hidden="true">Celebrate</span><span className="star" aria-hidden="true">✦</span><em aria-hidden="true">Love</em><span className="star" aria-hidden="true">✦</span><span aria-hidden="true">Remember</span><span className="star" aria-hidden="true">✦</span>
+          <span>Feiern</span><span className="star">✦</span><em>Lieben</em><span className="star">✦</span><span>Erinnern</span><span className="star">✦</span>
+          <span aria-hidden="true">Feiern</span><span className="star" aria-hidden="true">✦</span><em aria-hidden="true">Lieben</em><span className="star" aria-hidden="true">✦</span><span aria-hidden="true">Erinnern</span><span className="star" aria-hidden="true">✦</span>
         </div>
       </section>
 

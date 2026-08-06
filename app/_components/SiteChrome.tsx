@@ -11,7 +11,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
       <a className="brand" href="/" aria-label="CK Eventcenter Startseite">
         <span className="brand-mark">CK</span>
         <span className="brand-name">Eventcenter</span>
-        <span className="brand-place">Bergkamen / DE</span>
+        <span className="brand-place">Bergkamen / Deutschland</span>
       </a>
       <nav className="desktop-nav" aria-label="Hauptnavigation">
         {mainLinks.map(([href, label]) => <a href={href} key={href}>{label}</a>)}
@@ -33,21 +33,21 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-impact">
         <span>Bereit?</span>
-        <a href="/kontakt">Let&apos;s talk. <b>↗</b></a>
+        <a href="/kontakt">Sprechen wir. <b>↗</b></a>
       </div>
       <div className="footer-grid">
         <a className="brand footer-brand" href="/">
           <span className="brand-mark">CK</span><span className="brand-name">Eventcenter</span>
         </a>
         <address>Industriestraße 44a<br />59192 Bergkamen<br /><a href="mailto:info@ckeventcenter.de">info@ckeventcenter.de</a></address>
-        <nav aria-label="Locations und Service">
+        <nav aria-label="Säle und Angebot">
           <a href="/eventcenter">CK Eventcenter</a><a href="/garden">CK Garden</a><a href="/galerie">Fotogalerie</a><a href="/belegungsplan">Belegungsplan</a><a href="/kontakt">Kontakt</a>
         </nav>
         <nav aria-label="Rechtliches">
           <a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/agb">AGB</a><a href="/barrierefreiheit">Barrierefreiheit</a>
         </nav>
       </div>
-      <div className="footer-bottom"><span>© {new Date().getFullYear()} CK Eventcenter</span><span>Bergkamen / Germany</span><a href="#top">Top ↑</a></div>
+      <div className="footer-bottom"><span>© {new Date().getFullYear()} CK Eventcenter</span><span>Bergkamen / Deutschland</span><a href="#top">Nach oben ↑</a></div>
     </footer>
   );
 }
@@ -60,7 +60,7 @@ export function PageHero({ index, kicker, title, image, imageAlt }: { index: str
       <div className="page-hero-overlay" />
       <div className="page-hero-index">{index}</div>
       <div className="page-hero-copy"><p className="kicker">{kicker}</p><h1>{title}</h1></div>
-      <div className="hero-corner">Scroll<br />to explore <span>↓</span></div>
+      <div className="hero-corner">Weiter unten<br />entdecken <span>↓</span></div>
     </section>
   );
 }
@@ -85,7 +85,7 @@ export function LegalPage({ eyebrow, title, children }: { eyebrow: string; title
   return (
     <main className="legal-page">
       <Header solid />
-      <section className="legal-hero"><p className="kicker">{eyebrow}</p><h1>{title}</h1><span className="outline-word">CK / LEGAL</span></section>
+      <section className="legal-hero"><p className="kicker">{eyebrow}</p><h1>{title}</h1><span className="outline-word">CK / RECHT</span></section>
       <article className="legal-document">{children}</article>
       <Footer />
     </main>
