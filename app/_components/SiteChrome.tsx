@@ -3,6 +3,7 @@ const mainLinks = [
   ["/garden", "CK Garden"],
   ["/galerie", "Galerie"],
   ["/belegungsplan", "Belegungsplan"],
+  ["/buchung", "Buchung"],
 ];
 
 export function Header({ solid = false }: { solid?: boolean }) {
@@ -15,13 +16,13 @@ export function Header({ solid = false }: { solid?: boolean }) {
       </a>
       <nav className="desktop-nav" aria-label="Hauptnavigation">
         {mainLinks.map(([href, label]) => <a href={href} key={href}>{label}</a>)}
-        <a className="nav-cta" href="/kontakt">Anfragen <span>↗</span></a>
+        <a className="nav-cta" href="/buchung">Wunschtermin <span>↗</span></a>
       </nav>
       <details className="mobile-menu">
         <summary aria-label="Menü öffnen"><span>Menü</span><b>＋</b></summary>
         <nav aria-label="Mobile Navigation">
           {mainLinks.map(([href, label], index) => <a href={href} key={href}><small>0{index + 1}</small>{label}</a>)}
-          <a href="/kontakt"><small>05</small>Kontakt</a>
+          <a href="/kontakt"><small>06</small>Kontakt</a>
         </nav>
       </details>
     </header>
@@ -41,7 +42,7 @@ export function Footer() {
         </a>
         <address>Industriestraße 44a<br />59192 Bergkamen<br /><a href="mailto:info@ckeventcenter.de">info@ckeventcenter.de</a></address>
         <nav aria-label="Säle und Angebot">
-          <a href="/eventcenter">CK Eventcenter</a><a href="/garden">CK Garden</a><a href="/galerie">Fotogalerie</a><a href="/belegungsplan">Belegungsplan</a><a href="/kontakt">Kontakt</a>
+          <a href="/eventcenter">CK Eventcenter</a><a href="/garden">CK Garden</a><a href="/galerie">Fotogalerie</a><a href="/belegungsplan">Belegungsplan</a><a href="/buchung">Wunschtermin buchen</a><a href="/kontakt">Kontakt</a>
         </nav>
         <nav aria-label="Rechtliches">
           <a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/agb">AGB</a><a href="/barrierefreiheit">Barrierefreiheit</a>
