@@ -1,0 +1,181 @@
+{
+  "version": 3,
+  "settings": {
+    "calendlyUrl": "https://calendly.com/buchungen-ckeventcenter",
+    "bookingTitle": "Jetzt Beratungsgespräch buchen",
+    "bookingText": "Wählen Sie einen passenden Termin. Ihre Kontaktdaten werden automatisch an Calendly übergeben.",
+    "priceDisclaimer": "Unverbindliche Schätzung. Das finale Angebot erhalten Sie im Beratungsgespräch."
+  },
+  "halls": {
+    "event": {
+      "name": "CK Eventcenter",
+      "perks": "Großer Saal, Bühne, LED Wall, Grundlicht",
+      "image": "ckeventcenter.avif"
+    },
+    "garden": {
+      "name": "CKs Garden",
+      "perks": "Garden Hall, viel Tageslicht, Terrasse",
+      "image": "ckgarden2.avif"
+    }
+  },
+  "locations": {
+    "event": {
+      "rules": { "minGuests": 1, "maxGuests": 1000, "minGuestsByDay": { "saturday": 600 } },
+      "baseByDay": {
+        "friday": 2000,
+        "saturday": 5000,
+        "sunday": 2500,
+        "weekday": 0
+      },
+      "menu": {
+        "standard": {
+          "label": "Standardpaket (5 Menüs, Getränke, Deko inkl.)",
+          "perGuest": 12,
+          "note": "Dekoration, Geschirr, Knabberzeug, 5 Hauptspeisen, Getränkeflat, Brot, Personal"
+        }
+      },
+      "drinks": {
+        "included": {
+          "label": "Getränkeflat inklusive",
+          "perGuest": 0
+        }
+      },
+      "midnight": {
+        "none": {
+          "label": "Keine Abendsuppe",
+          "price": 0
+        },
+        "soup": {
+          "label": "Abendsuppe (pauschal)",
+          "price": 200
+        }
+      },
+      "extras": {
+        "starter_person": {
+          "label": "Vorspeise pro Person",
+          "perGuest": 3
+        },
+        "starter_platter": {
+          "label": "Vorspeise Mitte / Platte",
+          "perGuest": 1
+        },
+        "buffet_upgrade": {
+          "label": "Tischbuffet Hauptspeise Upgrade",
+          "perGuest": 5
+        },
+        "cake": {
+          "label": "Torte",
+          "price": 200
+        },
+        "dessert": {
+          "label": "Nachspeise (Baklava)",
+          "perGuest": 1
+        },
+        "photo_video": {
+          "label": "Fotograf (150 Saalfotos) & Videograf",
+          "price": 750
+        },
+        "sparkles": {
+          "label": "Fontänen & Bodennebel",
+          "price": 200
+        },
+        "fruit_center": {
+          "label": "Obst Mitte",
+          "perGuest": 1
+        },
+        "candy_buffet": {
+          "label": "Obst & Candy Buffet",
+          "perGuest": 4
+        },
+        "welcome_sign": {
+          "label": "Willkommensschild",
+          "price": 200
+        },
+        "photobox": {
+          "label": "Fotobox",
+          "price": 350,
+          "note": "200–500 € pauschal"
+        }
+      }
+    },
+    "garden": {
+      "rules": { "minGuests": 1, "maxGuests": 300, "minGuestsByDay": {} },
+      "baseByDay": {
+        "friday": 1500,
+        "saturday": 3500,
+        "sunday": 2000,
+        "weekday": 0
+      },
+      "menu": {
+        "standard": {
+          "label": "Standardpaket (5 Menüs, Getränke, Deko inkl.)",
+          "perGuest": 10,
+          "note": "Dekoration, Geschirr, Knabberzeug, 5 Hauptspeisen, Getränkeflat, Brot, Personal"
+        }
+      },
+      "drinks": {
+        "included": {
+          "label": "Getränkeflat inklusive",
+          "perGuest": 0
+        }
+      },
+      "midnight": {
+        "none": {
+          "label": "Keine Abendsuppe",
+          "price": 0
+        },
+        "soup": {
+          "label": "Abendsuppe (pauschal)",
+          "price": 150
+        }
+      },
+      "extras": {
+        "starter_person": {
+          "label": "Vorspeise pro Person",
+          "perGuest": 3
+        },
+        "starter_platter": {
+          "label": "Vorspeise Mitte / Platte",
+          "perGuest": 1
+        },
+        "buffet_upgrade": {
+          "label": "Tischbuffet Hauptspeise Upgrade",
+          "perGuest": 5
+        },
+        "cake": {
+          "label": "Torte",
+          "price": 200
+        },
+        "dessert": {
+          "label": "Nachspeise (Baklava)",
+          "perGuest": 1
+        },
+        "photo_video": {
+          "label": "Fotograf (150 Saalfotos) & Videograf",
+          "price": 750
+        },
+        "sparkles": {
+          "label": "Fontänen & Bodennebel",
+          "price": 200
+        },
+        "fruit_center": {
+          "label": "Obst Mitte",
+          "perGuest": 1
+        },
+        "candy_buffet": {
+          "label": "Obst & Candy Buffet",
+          "perGuest": 4
+        },
+        "welcome_sign": {
+          "label": "Willkommensschild",
+          "price": 200
+        },
+        "photobox": {
+          "label": "Fotobox",
+          "price": 350,
+          "note": "200–500 € pauschal"
+        }
+      }
+    }
+  }
+}
