@@ -180,14 +180,22 @@ function setLocalWeddingDate(location, date, status, details = {}) {
   groups.reserved = (groups.reserved || []).filter(value => value !== date);
   let dynamic = (data.reservations || []).find(row => row.location === location && row.date === date);
   if (dynamic) Object.assign(dynamic, details, { status, updatedAt: new Date().toISOString() });
-  else if (details.customer) {
-    dynamic = { id: crypto.randomUUID(), location, date, status, source: 'customer', ...details, createdAt: new Date().toISOString() };
-    delete dynamic.customer;
+  else {
+    dynamic = {
+      id: crypto.randomUUID(), location, date, status,
+      source: details.customer ? 'customer' : String(details.source || 'admin').slice(0, 50),
+      requestId: String(details.requestId || '').slice(0, 200),
+      name: String(details.name || '').slice(0, 200),
+      email: String(details.email || '').slice(0, 200),
+      phone: String(details.phone || '').slice(0, 100),
+      note: String(details.note || '').slice(0, 1000),
+      createdAt: new Date().toISOString()
+    };
     data.reservations = data.reservations || [];
     data.reservations.push(dynamic);
-  } else groups[status].push(date);
+  }
   saveAvailability(data);
-  return dynamic || { location, date, status, source: 'legacy' };
+  return dynamic;
 }
 
 function releaseLocalWeddingDate(location, date) {
@@ -368,9 +376,17 @@ app.get('/api/admin/availability', adminGuard, (req, res) => {
 
 app.put('/api/admin/availability', adminGuard, (req, res) => {
   try {
-    const { location, date, status, note } = req.body || {};
+    const body = req.body || {}, { location, date, status } = body;
     if (!['reserved', 'blocked'].includes(status)) return res.status(400).json({ error: 'Ungültiger Status.' });
-    res.json(setLocalWeddingDate(String(location), String(date), status, { note: String(note || '').slice(0, 1000) }));
+    const details = {
+      source: String(body.source || 'admin').slice(0, 50),
+      requestId: String(body.requestId || '').slice(0, 200),
+      name: String(body.name || '').slice(0, 200),
+      email: String(body.email || '').slice(0, 200),
+      phone: String(body.phone || '').slice(0, 100)
+    };
+    if (Object.prototype.hasOwnProperty.call(body, 'note')) details.note = String(body.note || '').slice(0, 1000);
+    res.json(setLocalWeddingDate(String(location), String(date), status, details));
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

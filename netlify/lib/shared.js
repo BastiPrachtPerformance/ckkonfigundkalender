@@ -367,7 +367,20 @@ async function setWeddingDateStatus(input) {
     dynamic.updatedAt = new Date().toISOString();
     if (input.note !== undefined) dynamic.note = String(input.note || '').slice(0, 1000);
   } else {
-    groups[status].push(date);
+    data.reservations = data.reservations || [];
+    data.reservations.push({
+      id: crypto.randomUUID(),
+      location,
+      date,
+      status,
+      source: String(input.source || 'admin').slice(0, 50),
+      requestId: String(input.requestId || '').slice(0, 200),
+      name: String(input.name || '').slice(0, 200),
+      email: String(input.email || '').slice(0, 200),
+      phone: String(input.phone || '').slice(0, 100),
+      note: String(input.note || '').slice(0, 1000),
+      createdAt: new Date().toISOString()
+    });
   }
   await saveAvailability(data);
   return availabilityRows(data, true).find((row) => row.location === location && row.date === date);
