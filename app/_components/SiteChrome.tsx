@@ -43,7 +43,7 @@ export function Footer() {
         <div><p>Prüfen Sie freie Hochzeitstermine, stellen Sie Ihre Feier zusammen und sichern Sie sich anschließend Ihre persönliche Beratung.</p><a className="footer-booking-button" href="/buchung">Buchung beginnen <span>↗</span></a></div>
       </div>
       <div className="footer-grid">
-        <div className="footer-identity"><a className="brand footer-brand" href="/"><span className="brand-mark">CK</span><span className="brand-name">Eventcenter</span></a><p>Außergewöhnliche Hochzeiten und große Feiern in Bergkamen.</p></div>
+        <div className="footer-identity"><a className="brand footer-brand" href="/"><span className="brand-mark">CK</span><span className="brand-name">Eventcenter</span></a><p>Seit 2015 außergewöhnliche Hochzeiten und große Feiern in Bergkamen.</p></div>
         <div className="footer-column"><span>Besuchen</span><address>Industriestraße 44a<br />59192 Bergkamen<br />Deutschland</address><a href="mailto:info@ckeventcenter.de">info@ckeventcenter.de ↗</a></div>
         <nav className="footer-column" aria-label="Säle und Angebot"><span>Entdecken</span><a href="/eventcenter">CK Eventcenter</a><a href="/garden">CK Garden</a><a href="/galerie">Galerie</a><a href="/belegungsplan">Termine</a><a href="/kontakt">Kontakt</a></nav>
         <nav className="footer-column" aria-label="Rechtliches"><span>Informationen</span><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/agb">AGB</a><a href="/barrierefreiheit">Barrierefreiheit</a></nav>

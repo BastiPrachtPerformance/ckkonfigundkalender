@@ -17,7 +17,7 @@ export default function Home() {
             <a className="line-button light" href="/kontakt">Gespräch vereinbaren <span>↗</span></a>
           </div>
         </div>
-        <div className="hero-side-note"><span>Seit</span><b>CK</b><span>Bergkamen</span></div>
+        <div className="hero-side-note"><span>Seit</span><b>2015</b><span>Bergkamen</span></div>
       </section>
 
       <section className="manifesto">
