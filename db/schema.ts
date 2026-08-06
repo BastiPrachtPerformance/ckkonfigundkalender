@@ -26,3 +26,19 @@ export const bookingRequests = sqliteTable("booking_requests", {
   status: text("status").notNull().default("neu"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const bookingSettings = sqliteTable("booking_settings", {
+  key: text("key").primaryKey(),
+  value: text("value", { mode: "json" }).notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const bookingDateNotes = sqliteTable("booking_date_notes", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  hall: text("hall").notNull(),
+  eventDate: text("event_date").notNull(),
+  note: text("note").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  uniqueIndex("idx_booking_date_notes_hall_event_date").on(table.hall, table.eventDate),
+]);

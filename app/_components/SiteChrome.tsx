@@ -1,9 +1,10 @@
-const mainLinks = [
+const mobileLinks = [
   ["/eventcenter", "Eventcenter"],
   ["/garden", "CK Garden"],
   ["/galerie", "Galerie"],
   ["/belegungsplan", "Belegungsplan"],
   ["/buchung", "Buchung"],
+  ["/kontakt", "Kontakt"],
 ];
 
 export function Header({ solid = false }: { solid?: boolean }) {
@@ -15,14 +16,19 @@ export function Header({ solid = false }: { solid?: boolean }) {
         <span className="brand-place">Bergkamen / Deutschland</span>
       </a>
       <nav className="desktop-nav" aria-label="Hauptnavigation">
-        {mainLinks.map(([href, label]) => <a href={href} key={href}>{label}</a>)}
-        <a className="nav-cta" href="/buchung">Wunschtermin <span>↗</span></a>
+        <details className="nav-dropdown">
+          <summary>Säle <span>⌄</span></summary>
+          <div><a href="/eventcenter"><small>01</small><b>CK Eventcenter</b></a><a href="/garden"><small>02</small><b>CK Garden</b></a></div>
+        </details>
+        <a href="/galerie">Galerie</a>
+        <a href="/belegungsplan">Termine</a>
+        <a href="/kontakt">Kontakt</a>
+        <a className="nav-cta" href="/buchung">Buchung starten <span>↗</span></a>
       </nav>
       <details className="mobile-menu">
         <summary aria-label="Menü öffnen"><span>Menü</span><b>＋</b></summary>
         <nav aria-label="Mobile Navigation">
-          {mainLinks.map(([href, label], index) => <a href={href} key={href}><small>0{index + 1}</small>{label}</a>)}
-          <a href="/kontakt"><small>06</small>Kontakt</a>
+          {mobileLinks.map(([href, label], index) => <a href={href} key={href}><small>0{index + 1}</small>{label}</a>)}
         </nav>
       </details>
     </header>
@@ -32,23 +38,17 @@ export function Header({ solid = false }: { solid?: boolean }) {
 export function Footer() {
   return (
     <footer className="site-footer">
-      <div className="footer-impact">
-        <span>Bereit?</span>
-        <a href="/kontakt">Sprechen wir. <b>↗</b></a>
+      <div className="footer-booking-teaser">
+        <div><p className="kicker">Ihr Fest beginnt hier</p><h2>Ein Datum.<br /><em>Ein Versprechen.</em></h2></div>
+        <div><p>Prüfen Sie freie Hochzeitstermine, stellen Sie Ihre Feier zusammen und sichern Sie sich anschließend Ihre persönliche Beratung.</p><a className="footer-booking-button" href="/buchung">Buchung beginnen <span>↗</span></a></div>
       </div>
       <div className="footer-grid">
-        <a className="brand footer-brand" href="/">
-          <span className="brand-mark">CK</span><span className="brand-name">Eventcenter</span>
-        </a>
-        <address>Industriestraße 44a<br />59192 Bergkamen<br /><a href="mailto:info@ckeventcenter.de">info@ckeventcenter.de</a></address>
-        <nav aria-label="Säle und Angebot">
-          <a href="/eventcenter">CK Eventcenter</a><a href="/garden">CK Garden</a><a href="/galerie">Fotogalerie</a><a href="/belegungsplan">Belegungsplan</a><a href="/buchung">Wunschtermin buchen</a><a href="/kontakt">Kontakt</a>
-        </nav>
-        <nav aria-label="Rechtliches">
-          <a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/agb">AGB</a><a href="/barrierefreiheit">Barrierefreiheit</a>
-        </nav>
+        <div className="footer-identity"><a className="brand footer-brand" href="/"><span className="brand-mark">CK</span><span className="brand-name">Eventcenter</span></a><p>Außergewöhnliche Hochzeiten und große Feiern in Bergkamen.</p></div>
+        <div className="footer-column"><span>Besuchen</span><address>Industriestraße 44a<br />59192 Bergkamen<br />Deutschland</address><a href="mailto:info@ckeventcenter.de">info@ckeventcenter.de ↗</a></div>
+        <nav className="footer-column" aria-label="Säle und Angebot"><span>Entdecken</span><a href="/eventcenter">CK Eventcenter</a><a href="/garden">CK Garden</a><a href="/galerie">Galerie</a><a href="/belegungsplan">Termine</a><a href="/kontakt">Kontakt</a></nav>
+        <nav className="footer-column" aria-label="Rechtliches"><span>Informationen</span><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/agb">AGB</a><a href="/barrierefreiheit">Barrierefreiheit</a></nav>
       </div>
-      <div className="footer-bottom"><span>© {new Date().getFullYear()} CK Eventcenter</span><span>Bergkamen / Deutschland</span><a href="#top">Nach oben ↑</a></div>
+      <div className="footer-bottom"><span>© {new Date().getFullYear()} CK Eventcenter</span><span>Mit Liebe für besondere Augenblicke.</span><a href="#top">Nach oben ↑</a></div>
     </footer>
   );
 }

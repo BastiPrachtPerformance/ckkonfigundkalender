@@ -1,5 +1,4 @@
-import { getD1 } from "../../../db";
-import pricingSource from "../../../Buchung/data/pricing.json";
+import { ensureBookingTables, getBookingPricing } from "../../../db/booking";
 import availabilitySource from "../../../Buchung/data/availability.json";
 
 type HallKey = "event" | "garden";
@@ -11,10 +10,6 @@ type LocationPricing = {
   drinks: Record<string, PriceEntry>;
   midnight: Record<string, PriceEntry>;
   extras: Record<string, PriceEntry>;
-};
-
-const pricing = pricingSource as unknown as {
-  locations: Record<HallKey, LocationPricing>;
 };
 
 const legacyAvailability = availabilitySource as unknown as {
@@ -42,37 +37,7 @@ function clean(value: unknown, max: number) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
-async function ensureBookingTables() {
-  const database = getD1();
-  await database.batch([
-    database.prepare(`CREATE TABLE IF NOT EXISTS booking_dates (
-      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-      hall TEXT NOT NULL,
-      event_date TEXT NOT NULL,
-      status TEXT DEFAULT 'reserved' NOT NULL,
-      request_id TEXT NOT NULL,
-      source TEXT DEFAULT 'customer' NOT NULL,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
-    )`),
-    database.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_booking_dates_hall_event_date ON booking_dates (hall, event_date)"),
-    database.prepare(`CREATE TABLE IF NOT EXISTS booking_requests (
-      id TEXT PRIMARY KEY NOT NULL,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      phone TEXT DEFAULT '' NOT NULL,
-      event_date TEXT NOT NULL,
-      hall TEXT NOT NULL,
-      guest_count INTEGER NOT NULL,
-      configuration TEXT NOT NULL,
-      total INTEGER NOT NULL,
-      status TEXT DEFAULT 'neu' NOT NULL,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
-    )`),
-  ]);
-  return database;
-}
-
-function calculateTotal(hall: HallKey, date: string, guestCount: number, configuration: Record<string, unknown>) {
+function calculateTotal(pricing: { locations: Record<HallKey, LocationPricing> }, hall: HallKey, date: string, guestCount: number, configuration: Record<string, unknown>) {
   const location = pricing.locations[hall];
   const key = dayKey(date);
   const itemTotal = (entry?: PriceEntry) => entry ? (Number(entry.price) || 0) + (Number(entry.perGuest) || 0) * guestCount : 0;
@@ -96,19 +61,21 @@ function calculateTotal(hall: HallKey, date: string, guestCount: number, configu
 export async function GET() {
   try {
     const database = await ensureBookingTables();
-    const dynamic = await database.prepare(
+    const [dynamic, pricing] = await Promise.all([database.prepare(
       "SELECT hall, event_date AS date, status FROM booking_dates ORDER BY event_date"
-    ).all<{ hall: HallKey; date: string; status: string }>();
+    ).all<{ hall: HallKey; date: string; status: string }>(), getBookingPricing()]);
+
+    const overrides = new Map((dynamic.results ?? []).map((entry) => [`${entry.hall}:${entry.date}`, entry]));
 
     const dates = (Object.keys(legacyAvailability.locations) as HallKey[]).flatMap((hall) => {
       const source = legacyAvailability.locations[hall];
       return [
-        ...source.blocked.map((date) => ({ hall, date, status: "blocked" })),
-        ...source.reserved.map((date) => ({ hall, date, status: "reserved" })),
+        ...source.blocked.filter((date) => !overrides.has(`${hall}:${date}`)).map((date) => ({ hall, date, status: "blocked" })),
+        ...source.reserved.filter((date) => !overrides.has(`${hall}:${date}`)).map((date) => ({ hall, date, status: "reserved" })),
       ];
     });
 
-    return Response.json({ dates: [...dates, ...(dynamic.results ?? [])] });
+    return Response.json({ dates: [...dates, ...(dynamic.results ?? []).filter((entry) => entry.status !== "released")], pricing });
   } catch (error) {
     return Response.json({ error: "Der Belegungskalender konnte gerade nicht geladen werden." }, { status: 500 });
   }
@@ -134,25 +101,26 @@ export async function POST(request: Request) {
     if (eventDate < new Date().toISOString().slice(0, 10)) {
       return Response.json({ error: "Bitte wählen Sie ein zukünftiges Hochzeitsdatum." }, { status: 400 });
     }
-    if (isLegacyBusy(hall, eventDate)) {
+    const database = await ensureBookingTables();
+    const existing = await database.prepare("SELECT status FROM booking_dates WHERE hall = ? AND event_date = ?").bind(hall, eventDate).first<{ status: string }>();
+    if ((existing && existing.status !== "released") || (!existing && isLegacyBusy(hall, eventDate))) {
       return Response.json({ error: "Dieser Hochzeitstermin ist bereits belegt oder vorreserviert." }, { status: 409 });
     }
 
+    const pricing = await getBookingPricing() as { locations: Record<HallKey, LocationPricing> };
     const location = pricing.locations[hall];
     const minimum = Number(location.rules.minGuestsByDay[dayKey(eventDate)] ?? location.rules.minGuests);
     if (!Number.isFinite(guestCount) || guestCount < minimum || guestCount > location.rules.maxGuests) {
       return Response.json({ error: `Für diesen Termin sind ${minimum} bis ${location.rules.maxGuests} Gäste möglich.` }, { status: 400 });
     }
 
-    const total = calculateTotal(hall, eventDate, guestCount, configuration);
+    const total = calculateTotal(pricing, hall, eventDate, guestCount, configuration);
     const id = crypto.randomUUID();
     const code = `CK-${hall === "event" ? "E" : "G"}-${eventDate.replaceAll("-", "").slice(2)}-${id.slice(0, 4).toUpperCase()}`;
-    const storedConfiguration = JSON.stringify({ ...configuration, notes, code });
-    const database = await ensureBookingTables();
-
+    const storedConfiguration = JSON.stringify({ ...configuration, notes, code, hall, date: eventDate, guestCount, dayKey: dayKey(eventDate) });
     await database.batch([
       database.prepare(
-        "INSERT INTO booking_dates (hall, event_date, status, request_id, source) VALUES (?, ?, 'reserved', ?, 'customer')"
+        "INSERT INTO booking_dates (hall, event_date, status, request_id, source) VALUES (?, ?, 'reserved', ?, 'customer') ON CONFLICT(hall, event_date) DO UPDATE SET status = 'reserved', request_id = excluded.request_id, source = 'customer', created_at = CURRENT_TIMESTAMP"
       ).bind(hall, eventDate, id),
       database.prepare(
         "INSERT INTO booking_requests (id, name, email, phone, event_date, hall, guest_count, configuration, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'neu')"

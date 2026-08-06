@@ -41,7 +41,8 @@ function getDayKey(value: string): DayKey {
   return "weekday";
 }
 
-export function BookingConfigurator({ pricing }: { pricing: Pricing }) {
+export function BookingConfigurator({ pricing: initialPricing }: { pricing: Pricing }) {
+  const [pricing, setPricing] = useState(initialPricing);
   const [step, setStep] = useState(0);
   const [hall, setHall] = useState<HallKey>("event");
   const [date, setDate] = useState("");
@@ -72,7 +73,7 @@ export function BookingConfigurator({ pricing }: { pricing: Pricing }) {
     let active = true;
     fetch("/api/buchung")
       .then((response) => response.ok ? response.json() : Promise.reject())
-      .then((data) => { if (active) setBusyDates(data.dates ?? []); })
+      .then((data) => { if (active) { setBusyDates(data.dates ?? []); if (data.pricing) setPricing(data.pricing); } })
       .catch(() => { if (active) setMessage("Der Kalender konnte gerade nicht vollständig geladen werden."); })
       .finally(() => { if (active) setLoadingCalendar(false); });
     return () => { active = false; };
