@@ -23,19 +23,22 @@ export async function generateMetadata(): Promise<Metadata> {
   const origin = `${protocol}://${host}`;
 
   return {
-    title: "CK Eventcenter Bergkamen | Hochzeiten & Feiern",
-    description: "CK Eventcenter und CK Garden in Bergkamen: elegante Locations für Hochzeiten, große Feiern und unvergessliche Momente.",
+    title: {
+      default: "CK Eventcenter Bergkamen | Hochzeiten & Feiern",
+      template: "%s | CK Eventcenter",
+    },
+    description: "CK Eventcenter und CK Garden in Bergkamen: zwei elegante Locations für Hochzeiten, große Feiern und unvergessliche Momente.",
     metadataBase: new URL(origin),
     openGraph: {
-      title: "CK Eventcenter – Momente, die bleiben.",
+      title: "CK Eventcenter – Ein Ort für das Unvergessliche.",
       description: "Zwei außergewöhnliche Locations für Hochzeiten und große Feiern in Bergkamen.",
-      images: [{ url: `${origin}/og.png`, width: 1200, height: 630, alt: "CK Eventcenter – Momente, die bleiben." }],
+      images: [{ url: `${origin}/og.png`, width: 1200, height: 630, alt: "CK Eventcenter – Ein Ort für das Unvergessliche." }],
       locale: "de_DE",
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: "CK Eventcenter – Momente, die bleiben.",
+      title: "CK Eventcenter – Ein Ort für das Unvergessliche.",
       description: "Eventcenter und Garden in Bergkamen.",
       images: [`${origin}/og.png`],
     },

@@ -1,0 +1,93 @@
+const mainLinks = [
+  ["/eventcenter", "Eventcenter"],
+  ["/garden", "CK Garden"],
+  ["/galerie", "Galerie"],
+  ["/belegungsplan", "Belegungsplan"],
+];
+
+export function Header({ solid = false }: { solid?: boolean }) {
+  return (
+    <header className={`site-header${solid ? " header-solid" : ""}`}>
+      <a className="brand" href="/" aria-label="CK Eventcenter Startseite">
+        <span className="brand-mark">CK</span>
+        <span className="brand-name">Eventcenter</span>
+        <span className="brand-place">Bergkamen / DE</span>
+      </a>
+      <nav className="desktop-nav" aria-label="Hauptnavigation">
+        {mainLinks.map(([href, label]) => <a href={href} key={href}>{label}</a>)}
+        <a className="nav-cta" href="/kontakt">Anfragen <span>↗</span></a>
+      </nav>
+      <details className="mobile-menu">
+        <summary aria-label="Menü öffnen"><span>Menü</span><b>＋</b></summary>
+        <nav aria-label="Mobile Navigation">
+          {mainLinks.map(([href, label], index) => <a href={href} key={href}><small>0{index + 1}</small>{label}</a>)}
+          <a href="/kontakt"><small>05</small>Kontakt</a>
+        </nav>
+      </details>
+    </header>
+  );
+}
+
+export function Footer() {
+  return (
+    <footer className="site-footer">
+      <div className="footer-impact">
+        <span>Bereit?</span>
+        <a href="/kontakt">Let&apos;s talk. <b>↗</b></a>
+      </div>
+      <div className="footer-grid">
+        <a className="brand footer-brand" href="/">
+          <span className="brand-mark">CK</span><span className="brand-name">Eventcenter</span>
+        </a>
+        <address>Industriestraße 44a<br />59192 Bergkamen<br /><a href="mailto:info@ckeventcenter.de">info@ckeventcenter.de</a></address>
+        <nav aria-label="Locations und Service">
+          <a href="/eventcenter">CK Eventcenter</a><a href="/garden">CK Garden</a><a href="/galerie">Fotogalerie</a><a href="/belegungsplan">Belegungsplan</a><a href="/kontakt">Kontakt</a>
+        </nav>
+        <nav aria-label="Rechtliches">
+          <a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/agb">AGB</a><a href="/barrierefreiheit">Barrierefreiheit</a>
+        </nav>
+      </div>
+      <div className="footer-bottom"><span>© {new Date().getFullYear()} CK Eventcenter</span><span>Bergkamen / Germany</span><a href="#top">Top ↑</a></div>
+    </footer>
+  );
+}
+
+export function PageHero({ index, kicker, title, image, imageAlt }: { index: string; kicker: string; title: React.ReactNode; image: string; imageAlt: string }) {
+  return (
+    <section className="page-hero" id="top">
+      <Header />
+      <img src={image} alt={imageAlt} />
+      <div className="page-hero-overlay" />
+      <div className="page-hero-index">{index}</div>
+      <div className="page-hero-copy"><p className="kicker">{kicker}</p><h1>{title}</h1></div>
+      <div className="hero-corner">Scroll<br />to explore <span>↓</span></div>
+    </section>
+  );
+}
+
+export function ContactForm() {
+  return (
+    <form className="contact-form" action="mailto:info@ckeventcenter.de" method="post" encType="text/plain">
+      <div className="field-row">
+        <label><span>01</span>Vorname<input name="Vorname" autoComplete="given-name" /></label>
+        <label><span>02</span>Nachname<input name="Nachname" autoComplete="family-name" /></label>
+      </div>
+      <label><span>03</span>E-Mail *<input type="email" name="E-Mail" autoComplete="email" required /></label>
+      <label><span>04</span>Telefonnummer<input type="tel" name="Telefon" autoComplete="tel" /></label>
+      <label><span>05</span>Nachricht an uns *<textarea name="Nachricht" rows={4} required /></label>
+      <button className="solid-button" type="submit">Anfrage senden <span>↗</span></button>
+      <small>Beim Absenden öffnet sich Ihr E-Mail-Programm.</small>
+    </form>
+  );
+}
+
+export function LegalPage({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
+  return (
+    <main className="legal-page">
+      <Header solid />
+      <section className="legal-hero"><p className="kicker">{eyebrow}</p><h1>{title}</h1><span className="outline-word">CK / LEGAL</span></section>
+      <article className="legal-document">{children}</article>
+      <Footer />
+    </main>
+  );
+}
