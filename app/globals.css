@@ -35,10 +35,9 @@ em { font-weight: 400; }
   padding: 0 4vw; color: white; border-bottom: 1px solid rgba(255,255,255,.22);
 }
 .header-solid { position: relative; color: var(--black); background: var(--paper); border-color: var(--line); }
-.brand { display: grid; grid-template-columns: 49px auto; grid-template-rows: 1fr 1fr; column-gap: 13px; align-items: center; min-width: 240px; text-transform: uppercase; }
-.brand-mark { grid-row: 1 / 3; display: grid; place-items: center; width: 49px; height: 49px; border: 1px solid currentColor; border-radius: 50%; font: 500 22px/1 var(--font-display); letter-spacing: -2px; }
-.brand-name { align-self: end; font-size: 12px; font-weight: 700; letter-spacing: .2em; }
-.brand-place { align-self: start; margin-top: 4px; font-size: 7px; letter-spacing: .24em; opacity: .55; }
+.brand { display: inline-flex; align-items: center; min-width: 172px; }
+.brand-logo { width: 172px; height: auto; filter: drop-shadow(0 8px 18px rgba(0,0,0,.22)); transition: transform .45s cubic-bezier(.2,.7,.2,1), filter .35s; }
+.brand:hover .brand-logo { transform: translateY(-2px) scale(1.025); filter: drop-shadow(0 12px 24px rgba(0,0,0,.28)); }
 .desktop-nav { display: flex; align-items: center; gap: clamp(20px, 2.2vw, 42px); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .desktop-nav > a:not(.nav-cta) { position: relative; padding: 14px 0; }
 .desktop-nav > a:not(.nav-cta)::after { content: ""; position: absolute; right: 100%; bottom: 8px; left: 0; height: 1px; background: currentColor; transition: right .25s; }
@@ -67,7 +66,7 @@ em { font-weight: 400; }
 .hero-ornament { position: absolute; right: -2vw; bottom: -18vh; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.17); font: italic 620px/.7 var(--font-display); pointer-events: none; }
 .home-hero-copy { position: relative; z-index: 2; width: 86%; padding: 0 0 7vh 7vw; }
 .home-hero-copy .kicker { margin-bottom: 32px; }
-.home-hero-copy h1 { max-width: 1100px; font-size: clamp(74px, 9.3vw, 146px); line-height: .74; }
+.home-hero-copy h1 { max-width: 1100px; padding-bottom: .12em; margin-bottom: -.12em; font-size: clamp(74px, 9.3vw, 146px); line-height: .8; }
 .home-hero-copy h1 em { color: var(--gold-light); }
 .hero-meta { display: flex; align-items: end; gap: 9vw; margin-top: 45px; }
 .hero-meta p { margin: 0; color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.7; }
@@ -243,7 +242,8 @@ em { font-weight: 400; }
 .footer-impact > a { font: 500 clamp(70px, 9vw, 140px)/.8 var(--font-display); letter-spacing: -.05em; }
 .footer-impact b { color: var(--gold); font-family: var(--font-sans); font-size: .28em; }
 .footer-grid { display: grid; grid-template-columns: 1.4fr 1.4fr 1fr 1fr; gap: 5vw; padding: 65px 0; }
-.footer-brand { align-self: start; }
+.footer-brand { align-self: start; min-width: 0; }
+.footer-brand .brand-logo { width: min(100%, 245px); }
 .footer-grid address { color: rgba(255,255,255,.58); font-size: 10px; font-style: normal; line-height: 1.8; }
 .footer-grid address a { color: white; }
 .footer-grid nav { display: flex; flex-direction: column; gap: 14px; color: rgba(255,255,255,.58); font-size: 9px; letter-spacing: .08em; }
@@ -293,8 +293,6 @@ em { font-weight: 400; }
 .garden-features > div:hover { background: rgba(255,255,255,.22); }
 .booking-option { transition: transform .45s, box-shadow .45s, border-radius .45s; }
 .booking-option:hover { position: relative; z-index: 2; transform: translateY(-12px); border-radius: 28px; box-shadow: 0 30px 80px rgba(12,71,47,.18); }
-.brand-mark { transition: transform .7s cubic-bezier(.2,.7,.2,1), background .4s, color .4s; }
-.brand:hover .brand-mark { transform: rotate(360deg); color: var(--wine); background: var(--gold-light); border-color: var(--gold-light); }
 .line-button:hover { color: white; background: var(--wine); border-color: var(--wine); transform: translate3d(var(--mag-x, 0px), calc(var(--mag-y, 0px) - 3px), 0); }
 .line-button.light:hover { color: var(--black); background: white; border-color: white; }
 .solid-button::before { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.28) 48%, transparent 70%); transform: translateX(-130%); transition: transform .75s; }
@@ -329,14 +327,12 @@ em { font-weight: 400; }
 
 @media (max-width: 720px) {
   .site-header { height: 78px; padding: 0 20px; }
-  .brand { grid-template-columns: 41px auto; min-width: 0; }
-  .brand-mark { width: 41px; height: 41px; }
-  .brand-name { font-size: 10px; }
-  .brand-place { display: none; }
+  .brand { min-width: 0; }
+  .brand-logo { width: 126px; }
   .mobile-menu nav { top: 78px; }
   .home-hero, .page-hero, .booking-hero { min-height: 680px; }
   .home-hero-copy, .page-hero-copy, .booking-hero-copy { width: auto; padding: 0 22px 50px; }
-  .home-hero-copy h1 { font-size: clamp(63px, 20vw, 92px); line-height: .77; }
+  .home-hero-copy h1 { font-size: clamp(63px, 20vw, 92px); line-height: .84; }
   .hero-meta { align-items: flex-start; flex-direction: column; gap: 20px; margin-top: 38px; }
   .hero-ornament { display: none; }
   .manifesto { padding: 85px 22px 95px; }
