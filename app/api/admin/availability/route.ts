@@ -1,4 +1,4 @@
-import availabilitySource from "../../../../Buchung/data/availability.json";
+import availabilitySource from "../../../../data/booking/availability.json";
 import { ensureBookingTables, isAdminRequest, unauthorized } from "../../../../db/booking";
 
 type HallKey = "event" | "garden";

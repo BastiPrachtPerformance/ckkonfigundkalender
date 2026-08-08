@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import pricing from "../../Buchung/data/pricing.json";
+import pricing from "../../data/booking/pricing.json";
 import { Footer, Header } from "../_components/SiteChrome";
 import { BookingConfigurator } from "./BookingConfigurator";
 

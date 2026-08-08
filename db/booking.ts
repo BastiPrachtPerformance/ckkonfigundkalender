@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { getD1 } from ".";
-import defaultPricing from "../Buchung/data/pricing.json";
+import defaultPricing from "../data/booking/pricing.json";
 
 const PRICING_KEY = "pricing";
 const encoder = new TextEncoder();

@@ -1,5 +1,5 @@
 import { ensureBookingTables, getBookingPricing } from "../../../db/booking";
-import availabilitySource from "../../../Buchung/data/availability.json";
+import availabilitySource from "../../../data/booking/availability.json";
 
 type HallKey = "event" | "garden";
 type PriceEntry = { label: string; price?: number; perGuest?: number };
