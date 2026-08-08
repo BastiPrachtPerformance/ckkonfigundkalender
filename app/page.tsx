@@ -60,7 +60,7 @@ export default function Home() {
       <section className="date-cta">
         <img src={images.eventDark} alt="Abendliche Atmosphäre im CK Eventcenter" />
         <div className="date-overlay" />
-        <div className="date-copy"><p className="section-label light">03 / Ihr Termin</p><h2>Ihr großer Tag<br />verdient den <em>richtigen Ort.</em></h2><div><a className="solid-button gold" href="/belegungsplan">Wunschtermin prüfen <span>↗</span></a><a className="line-button light" href="/kontakt">Persönlich anfragen <span>↗</span></a></div></div>
+        <div className="date-copy"><p className="section-label light">03 / Wunschtermin prüfen</p><h2>Ihr großer Tag<br />verdient den <em>richtigen Ort.</em></h2><div><a className="solid-button gold" href="/belegungsplan">Wunschtermin prüfen <span>↗</span></a><a className="line-button light" href="/kontakt">Persönlich anfragen <span>↗</span></a></div></div>
       </section>
 
       <Footer />
