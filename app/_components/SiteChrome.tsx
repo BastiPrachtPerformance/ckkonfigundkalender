@@ -82,7 +82,7 @@ export function ContactForm() {
 
 export function LegalPage({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
-    <main className="legal-page">
+    <main className="legal-page" id="top">
       <Header solid />
       <section className="legal-hero"><p className="kicker">{eyebrow}</p><h1>{title}</h1><span className="outline-word">CK / RECHT</span></section>
       <article className="legal-document">{children}</article>
