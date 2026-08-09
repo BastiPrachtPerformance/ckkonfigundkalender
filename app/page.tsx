@@ -14,7 +14,7 @@ export default function Home() {
           <h1>Ein Ort für<br /><em>das Unvergessliche.</em></h1>
           <div className="hero-meta">
             <p>Hochzeiten. Große Feiern.<br />Momente, die bleiben.</p>
-            <a className="line-button light" href="/kontakt">Gespräch vereinbaren <span>↗</span></a>
+            <a className="line-button light" href="/buchung">Gespräch vereinbaren <span>↗</span></a>
           </div>
         </div>
         <div className="hero-side-note"><span>Seit</span><b>2015</b><span>Bergkamen</span></div>
