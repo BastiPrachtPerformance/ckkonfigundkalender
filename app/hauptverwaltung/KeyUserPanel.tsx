@@ -93,7 +93,6 @@ export default function KeyUserPanel() {
           <img src="/ck-eventcenter-logo.png" alt="CK Eventcenter Bergkamen" />
           <p className="keyuser-kicker">Geschützter Systemzugang</p>
           <h1>Hauptverwaltung</h1>
-          <p>Dieser Bereich steuert die Erreichbarkeit der gesamten Internetseite.</p>
           <form onSubmit={login}>
             <label htmlFor="keyuser-password">Passwort</label>
             <input id="keyuser-password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />

@@ -624,7 +624,7 @@ em { font-weight: 400; }
 .keyuser-login-card h1, .keyuser-panel h1, .keyuser-panel h2 { color: #11241a; }
 .keyuser-login-card h1 { margin-top: 10px; font-size: 54px; line-height: .95; }
 .keyuser-login-card > p:not(.keyuser-kicker, .keyuser-message) { margin: 20px 0 30px; color: #667068; font-size: 13px; line-height: 1.7; }
-.keyuser-login-card form { display: grid; gap: 10px; }
+.keyuser-login-card form { display: grid; gap: 10px; margin-top: 30px; }
 .keyuser-login-card label { color: #59645d; font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .keyuser-login-card input { width: 100%; min-height: 52px; padding: 0 16px; border: 1px solid #d5dcd6; border-radius: 14px; color: #17221d; background: white; outline: 0; }
 .keyuser-login-card input:focus { border-color: #c9a75f; box-shadow: 0 0 0 4px rgba(201,167,95,.16); }
