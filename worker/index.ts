@@ -1,6 +1,7 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { readSiteEnabled } from "../db/site-control";
 
 interface Env {
   ASSETS: Fetcher;
@@ -19,6 +20,26 @@ interface ExecutionContext {
   passThroughOnException(): void;
 }
 
+function isHauptverwaltungRequest(pathname: string) {
+  return pathname === "/hauptverwaltung"
+    || pathname.startsWith("/hauptverwaltung/")
+    || pathname.startsWith("/api/hauptverwaltung/")
+    || pathname.startsWith("/_next/")
+    || pathname === "/ck-eventcenter-logo.png"
+    || pathname === "/favicon.svg";
+}
+
+function unavailableResponse() {
+  return new Response(`<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>404 – Seite nicht verfügbar</title>
+<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;color:#f3f0e4;background:#07110d;font-family:Arial,sans-serif;text-align:center}main{max-width:720px}span{display:inline-grid;place-items:center;width:76px;height:76px;border:1px solid #c9a75f;border-radius:50%;color:#c9a75f;font:italic 28px Georgia,serif}h1{margin:28px 0 12px;font:500 clamp(42px,8vw,82px)/.95 Georgia,serif;letter-spacing:-.045em}p{margin:0;color:rgba(255,255,255,.64);font-size:15px;line-height:1.7}</style></head>
+<body><main><span>404</span><h1>Seite nicht verfügbar</h1><p>Diese Internetseite ist derzeit nicht erreichbar.</p></main></body></html>`, {
+    status: 404,
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
+  });
+}
+
 // Image security config. SVG sources with .svg extension auto-skip the
 // optimization endpoint on the client side (served directly, no proxy).
 // To route SVGs through the optimizer (with security headers), set
@@ -28,6 +49,14 @@ interface ExecutionContext {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    if (!isHauptverwaltungRequest(url.pathname)) {
+      try {
+        if (!await readSiteEnabled(env.DB)) return unavailableResponse();
+      } catch (error) {
+        console.error("Der Seitenstatus konnte nicht gelesen werden.", error);
+      }
+    }
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
