@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { headers } from "next/headers";
 import { Experience } from "./_components/Experience";
+import { PrachtControlTracker } from "./_components/PrachtControlTracker";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="de">
       <body className={`${display.variable} ${sans.variable}`}>
         <Experience />
+        <PrachtControlTracker />
         {children}
       </body>
     </html>
