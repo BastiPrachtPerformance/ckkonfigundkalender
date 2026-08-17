@@ -213,6 +213,12 @@ em { font-weight: 400; }
 .contact-details > a { display: flex; justify-content: space-between; max-width: 340px; padding-bottom: 12px; border-bottom: 1px solid var(--black); font-size: 11px; font-weight: 700; }
 .contact-rule { max-width: 340px; height: 1px; margin: 55px 0 25px; background: var(--line); }
 .small-copy { max-width: 340px; color: #766b66; font-size: 10px; line-height: 1.7; }
+.contact-form-column { display: flex; flex-direction: column; gap: 22px; }
+.contact-wizard-note { padding: 34px 40px; color: white; background: var(--green); }
+.contact-wizard-note > span { color: var(--gold-light); font-size: 9px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.contact-wizard-note h2 { margin: 14px 0 12px; font-size: clamp(31px, 3vw, 45px); line-height: .95; }
+.contact-wizard-note p { max-width: 620px; margin: 0 0 24px; color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.75; }
+.contact-wizard-note .solid-button { color: var(--black); background: var(--gold-light); }
 .contact-form { display: flex; flex-direction: column; gap: 28px; padding: 55px; background: white; box-shadow: 0 30px 80px rgba(9,48,31,.09); }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .contact-form label { position: relative; display: flex; flex-direction: column; gap: 12px; color: #6d625e; font-size: 8px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
@@ -385,6 +391,7 @@ em { font-weight: 400; }
   .contact-body { padding: 85px 22px; }
   .contact-details h2 { font-size: 58px; }
   .contact-form { padding: 35px 24px; }
+  .contact-wizard-note { padding: 30px 24px; }
   .field-row { grid-template-columns: 1fr; }
   .legal-hero { min-height: 370px; padding: 85px 22px 55px; }
   .legal-hero h1 { font-size: 68px; }

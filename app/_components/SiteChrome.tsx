@@ -75,8 +75,8 @@ export function ContactForm() {
       </div>
       <label><span>03</span>E-Mail *<input type="email" name="E-Mail" autoComplete="email" required /></label>
       <label><span>04</span>Telefonnummer<input type="tel" name="Telefon" autoComplete="tel" /></label>
-      <label><span>05</span>Nachricht an uns *<textarea name="Nachricht" rows={4} required /></label>
-      <button className="solid-button" type="submit">Anfrage senden <span>↗</span></button>
+      <label><span>05</span>Ihr sonstiges Anliegen *<textarea name="Nachricht" rows={4} placeholder="Worum geht es?" required /></label>
+      <button className="solid-button" type="submit">Nachricht senden <span>↗</span></button>
       <small>Beim Absenden öffnet sich Ihr E-Mail-Programm.</small>
     </form>
   );
