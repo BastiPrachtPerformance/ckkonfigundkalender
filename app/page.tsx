@@ -1,4 +1,5 @@
 import { Footer, Header } from "./_components/SiteChrome";
+import { ResponsiveImage } from "./_components/ResponsiveImage";
 import { gallery, images } from "./_data";
 
 export default function Home() {
@@ -6,7 +7,7 @@ export default function Home() {
     <main className="home-page">
       <section className="home-hero" id="top">
         <Header />
-        <img src={images.hero} alt="Festlich beleuchteter Saal des CK Eventcenters" />
+        <ResponsiveImage src={images.hero} alt="Festlich beleuchteter Saal des CK Eventcenters" loading="eager" fetchPriority="high" sizes="100vw" />
         <div className="home-hero-overlay" />
         <div className="hero-ornament" aria-hidden="true">C</div>
         <div className="home-hero-copy">
@@ -31,13 +32,13 @@ export default function Home() {
 
       <section className="location-portals">
         <a className="portal" href="/eventcenter">
-          <img src={images.eventcenter} alt="Großer Festsaal des CK Eventcenters" />
+          <ResponsiveImage src={images.eventcenter} alt="Großer Festsaal des CK Eventcenters" sizes="(max-width: 720px) 100vw, 50vw" />
           <div className="portal-shade" />
           <span className="portal-index">01</span>
           <div className="portal-copy"><p>Glanzvoll / Großzügig</p><h2>CK<br />Eventcenter</h2><span>Saal entdecken ↗</span></div>
         </a>
         <a className="portal" href="/garden">
-          <img src={images.garden} alt="CK Garden mit stilvoller Dekoration" />
+          <ResponsiveImage src={images.garden} alt="CK Garden mit stilvoller Dekoration" sizes="(max-width: 720px) 100vw, 50vw" />
           <div className="portal-shade" />
           <span className="portal-index">02</span>
           <div className="portal-copy"><p>Natur / Stil / Leichtigkeit</p><h2>CK<br /><em>Garden</em></h2><span>Garten entdecken ↗</span></div>
@@ -53,12 +54,12 @@ export default function Home() {
 
       <section className="home-gallery">
         <div className="gallery-intro"><p className="section-label">02 / Atmosphäre</p><h2>Nicht nur sehen.<br /><em>Fühlen.</em></h2><a className="line-button" href="/galerie">Zur Fotogalerie <span>↗</span></a></div>
-        <figure className="home-gallery-main"><img src={gallery[3][0]} alt={gallery[3][1]} /></figure>
-        <figure className="home-gallery-side"><img src={gallery[7][0]} alt={gallery[7][1]} /></figure>
+        <figure className="home-gallery-main"><ResponsiveImage src={gallery[3][0]} alt={gallery[3][1]} sizes="(max-width: 900px) 100vw, 62vw" /></figure>
+        <figure className="home-gallery-side"><ResponsiveImage src={gallery[7][0]} alt={gallery[7][1]} sizes="(max-width: 900px) 100vw, 34vw" /></figure>
       </section>
 
       <section className="date-cta">
-        <img src={images.eventDark} alt="Abendliche Atmosphäre im CK Eventcenter" />
+        <ResponsiveImage src={images.eventDark} alt="Abendliche Atmosphäre im CK Eventcenter" sizes="100vw" />
         <div className="date-overlay" />
         <div className="date-copy"><p className="section-label light">03 / Wunschtermin prüfen</p><h2>Ihr großer Tag<br />verdient den <em>richtigen Ort.</em></h2><div><a className="solid-button gold" href="/belegungsplan">Wunschtermin prüfen <span>↗</span></a><a className="line-button light" href="/kontakt">Persönlich anfragen <span>↗</span></a></div></div>
       </section>

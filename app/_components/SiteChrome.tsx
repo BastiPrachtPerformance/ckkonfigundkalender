@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ResponsiveImage } from "./ResponsiveImage";
 
 const mobileLinks = [
   ["/eventcenter", "Eventcenter"],
@@ -57,7 +58,7 @@ export function PageHero({ index, kicker, title, image, imageAlt }: { index: str
   return (
     <section className="page-hero" id="top">
       <Header />
-      <img src={image} alt={imageAlt} />
+      <ResponsiveImage src={image} alt={imageAlt} loading="eager" fetchPriority="high" sizes="100vw" />
       <div className="page-hero-overlay" />
       <div className="page-hero-index">{index}</div>
       <div className="page-hero-copy"><p className="kicker">{kicker}</p><h1>{title}</h1></div>

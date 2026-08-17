@@ -35,6 +35,16 @@ export function Experience() {
     const parallaxImages = Array.from(document.querySelectorAll<HTMLElement>(
       ".home-gallery figure img, .image-composition figure img, .split-story > img, .gallery-masonry figure img"
     ));
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const visibleParallax = new Set<HTMLElement>();
+    const parallaxObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const image = entry.target as HTMLElement;
+        if (entry.isIntersecting) visibleParallax.add(image);
+        else visibleParallax.delete(image);
+      });
+    }, { rootMargin: "150px 0px" });
+    parallaxImages.forEach((image) => parallaxObserver.observe(image));
 
     const magneticItems = Array.from(document.querySelectorAll<HTMLElement>(
       ".solid-button, .line-button, .nav-cta"
@@ -58,19 +68,24 @@ export function Experience() {
       item.addEventListener("pointerleave", onMagneticLeave);
     });
 
-    const onScroll = () => {
+    let scrollFrame = 0;
+    const updateScroll = () => {
+      scrollFrame = 0;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const value = max > 0 ? window.scrollY / max : 0;
       if (progress.current) progress.current.style.transform = `scaleX(${value})`;
-      root.style.setProperty("--scroll-y", `${window.scrollY}px`);
 
-      parallaxImages.forEach((image) => {
+      const updates = Array.from(visibleParallax, (image) => {
         const rect = image.getBoundingClientRect();
-        if (rect.bottom < -100 || rect.top > window.innerHeight + 100) return;
         const center = rect.top + rect.height / 2;
         const shift = Math.max(-28, Math.min(28, (center - window.innerHeight / 2) * -.045));
-        image.style.setProperty("--image-shift", `${shift}px`);
+        return { image, shift };
       });
+      updates.forEach(({ image, shift }) => image.style.setProperty("--image-shift", `${shift}px`));
+    };
+
+    const onScroll = () => {
+      if (!scrollFrame) scrollFrame = window.requestAnimationFrame(updateScroll);
     };
 
     const onPointer = (event: PointerEvent) => {
@@ -116,8 +131,8 @@ export function Experience() {
     onScroll();
 
     const canvas = atmosphere.current;
-    const context = canvas?.getContext("2d");
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const atmosphereEnabled = !reduceMotion;
+    const context = atmosphereEnabled ? canvas?.getContext("2d") : null;
     let animationFrame = 0;
     let particles: Array<{ x: number; y: number; size: number; speed: number; drift: number; phase: number }> = [];
 
@@ -142,18 +157,20 @@ export function Experience() {
     const drawAtmosphere = (time: number) => {
       if (!canvas || !context) return;
       context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      context.fillStyle = "rgb(231, 205, 157)";
+      context.strokeStyle = "rgb(255, 239, 208)";
+      context.lineWidth = .5;
       particles.forEach((particle) => {
         particle.y -= particle.speed;
         particle.x += Math.sin(time * .00035 + particle.phase) * particle.drift;
         if (particle.y < -8) { particle.y = window.innerHeight + 8; particle.x = Math.random() * window.innerWidth; }
         const pulse = .18 + (Math.sin(time * .0014 + particle.phase) + 1) * .13;
-        context.fillStyle = `rgba(231, 205, 157, ${pulse})`;
+        context.globalAlpha = pulse;
         context.beginPath();
         context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
         context.fill();
         if (particle.size > 1.45) {
-          context.strokeStyle = `rgba(255, 239, 208, ${pulse * .55})`;
-          context.lineWidth = .5;
+          context.globalAlpha = pulse * .55;
           context.beginPath();
           context.moveTo(particle.x - 4, particle.y);
           context.lineTo(particle.x + 4, particle.y);
@@ -162,19 +179,24 @@ export function Experience() {
           context.stroke();
         }
       });
+      context.globalAlpha = 1;
       animationFrame = window.requestAnimationFrame(drawAtmosphere);
     };
 
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-    if (!reduceMotion) animationFrame = window.requestAnimationFrame(drawAtmosphere);
+    if (atmosphereEnabled) {
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+      animationFrame = window.requestAnimationFrame(drawAtmosphere);
+    }
 
     return () => {
       observer.disconnect();
+      parallaxObserver.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
       document.removeEventListener("click", onClick);
       window.removeEventListener("resize", resizeCanvas);
+      window.cancelAnimationFrame(scrollFrame);
       window.cancelAnimationFrame(animationFrame);
       magneticItems.forEach((item) => {
         item.removeEventListener("pointermove", onMagneticMove);
