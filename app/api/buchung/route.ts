@@ -1,4 +1,5 @@
 import { ensureBookingTables, getBookingPricing } from "../../../db/booking";
+import { consumeRateLimit, rateLimitResponse } from "../../../db/rate-limit";
 import availabilitySource from "../../../data/booking/availability.json";
 
 type HallKey = "event" | "garden";
@@ -17,7 +18,22 @@ const legacyAvailability = availabilitySource as unknown as {
 };
 
 function isDate(value: unknown): value is string {
-  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
+}
+
+function berlinDate() {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts();
+  const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${value.year}-${value.month}-${value.day}`;
+}
+
+function latestBookableDate() {
+  const date = new Date(`${berlinDate()}T12:00:00Z`);
+  date.setUTCFullYear(date.getUTCFullYear() + 5);
+  return date.toISOString().slice(0, 10);
 }
 
 function isLegacyBusy(hall: HallKey, date: string) {
@@ -65,7 +81,7 @@ export async function GET() {
       "SELECT hall, event_date AS date, status FROM booking_dates ORDER BY event_date"
     ).all<{ hall: HallKey; date: string; status: string }>(), getBookingPricing()]);
 
-    const overrides = new Map((dynamic.results ?? []).map((entry) => [`${entry.hall}:${entry.date}`, entry]));
+    const overrides = new Map((dynamic.results ?? []).map((entry: { hall: HallKey; date: string; status: string }) => [`${entry.hall}:${entry.date}`, entry]));
 
     const dates = (Object.keys(legacyAvailability.locations) as HallKey[]).flatMap((hall) => {
       const source = legacyAvailability.locations[hall];
@@ -75,14 +91,16 @@ export async function GET() {
       ];
     });
 
-    return Response.json({ dates: [...dates, ...(dynamic.results ?? []).filter((entry) => entry.status !== "released")], pricing });
-  } catch (error) {
+    return Response.json({ dates: [...dates, ...(dynamic.results ?? []).filter((entry: { status: string }) => entry.status !== "released")], pricing });
+  } catch {
     return Response.json({ error: "Der Belegungskalender konnte gerade nicht geladen werden." }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
+    const rateLimit = await consumeRateLimit(request, "booking-submit", 5, 60 * 60);
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfter);
     const body = await request.json() as Record<string, unknown>;
     const name = clean(body.name, 160);
     const email = clean(body.email, 200).toLowerCase();
@@ -98,7 +116,7 @@ export async function POST(request: Request) {
     if (!name || !/^\S+@\S+\.\S+$/.test(email) || !isDate(eventDate) || !["event", "garden"].includes(hall)) {
       return Response.json({ error: "Bitte prüfen Sie Name, E-Mail, Saal und Hochzeitsdatum." }, { status: 400 });
     }
-    if (eventDate < new Date().toISOString().slice(0, 10)) {
+    if (eventDate < berlinDate() || eventDate > latestBookableDate()) {
       return Response.json({ error: "Bitte wählen Sie ein zukünftiges Hochzeitsdatum." }, { status: 400 });
     }
     const database = await ensureBookingTables();
@@ -118,9 +136,10 @@ export async function POST(request: Request) {
     const id = crypto.randomUUID();
     const code = `CK-${hall === "event" ? "E" : "G"}-${eventDate.replaceAll("-", "").slice(2)}-${id.slice(0, 4).toUpperCase()}`;
     const storedConfiguration = JSON.stringify({ ...configuration, notes, code, hall, date: eventDate, guestCount, dayKey: dayKey(eventDate) });
+    await database.prepare("DELETE FROM booking_dates WHERE hall = ? AND event_date = ? AND status = 'released'").bind(hall, eventDate).run();
     await database.batch([
       database.prepare(
-        "INSERT INTO booking_dates (hall, event_date, status, request_id, source) VALUES (?, ?, 'reserved', ?, 'customer') ON CONFLICT(hall, event_date) DO UPDATE SET status = 'reserved', request_id = excluded.request_id, source = 'customer', created_at = CURRENT_TIMESTAMP"
+        "INSERT INTO booking_dates (hall, event_date, status, request_id, source) VALUES (?, ?, 'reserved', ?, 'customer')"
       ).bind(hall, eventDate, id),
       database.prepare(
         "INSERT INTO booking_requests (id, name, email, phone, event_date, hall, guest_count, configuration, total, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'neu')"

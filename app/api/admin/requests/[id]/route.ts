@@ -17,6 +17,15 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   if (!await isAdminRequest(request)) return unauthorized();
   const { id } = await params;
   const database = await ensureBookingTables();
-  await database.prepare("DELETE FROM booking_requests WHERE id = ?").bind(id).run();
-  return Response.json({ ok: true });
+  const existing = await database.prepare("SELECT id FROM booking_requests WHERE id = ?").bind(id).first<{ id: string }>();
+  if (!existing) return Response.json({ error: "Anfrage nicht gefunden." }, { status: 404 });
+  await database.batch([
+    database.prepare(`DELETE FROM booking_date_notes WHERE EXISTS (
+      SELECT 1 FROM booking_dates d
+      WHERE d.request_id = ? AND d.hall = booking_date_notes.hall AND d.event_date = booking_date_notes.event_date
+    )`).bind(id),
+    database.prepare("UPDATE booking_dates SET status = 'released', request_id = '', source = 'admin' WHERE request_id = ?").bind(id),
+    database.prepare("DELETE FROM booking_requests WHERE id = ?").bind(id),
+  ]);
+  return Response.json({ ok: true, releasedDate: true });
 }

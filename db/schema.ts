@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const bookingDates = sqliteTable("booking_dates", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -41,4 +41,13 @@ export const bookingDateNotes = sqliteTable("booking_date_notes", {
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
   uniqueIndex("idx_booking_date_notes_hall_event_date").on(table.hall, table.eventDate),
+]);
+
+export const requestRateLimits = sqliteTable("request_rate_limits", {
+  scope: text("scope").notNull(),
+  clientKey: text("client_key").notNull(),
+  windowStarted: integer("window_started").notNull(),
+  count: integer("count").notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.scope, table.clientKey] }),
 ]);

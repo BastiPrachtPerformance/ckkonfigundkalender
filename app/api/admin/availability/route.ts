@@ -5,20 +5,28 @@ type HallKey = "event" | "garden";
 type DateRow = { hall: HallKey; date: string; status: string; requestId?: string; source?: string; createdAt?: string; note?: string; name?: string; email?: string; phone?: string };
 const legacy = availabilitySource as unknown as { locations: Record<HallKey, { blocked: string[]; reserved: string[] }> };
 
+function validDate(value: unknown) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
+}
+
 function validInput(body: Record<string, unknown>) {
-  return ["event", "garden"].includes(String(body.location)) && /^\d{4}-\d{2}-\d{2}$/.test(String(body.date)) && ["reserved", "blocked"].includes(String(body.status));
+  return ["event", "garden"].includes(String(body.location)) && validDate(body.date) && ["reserved", "blocked"].includes(String(body.status));
 }
 
 export async function GET(request: Request) {
   if (!await isAdminRequest(request)) return unauthorized();
   const database = await ensureBookingTables();
   const dynamic = await database.prepare(`SELECT d.hall, d.event_date AS date, d.status, d.request_id AS requestId,
-    d.source, d.created_at AS createdAt, n.note, r.name, r.email, r.phone
+    d.source, d.created_at AS createdAt,
+    n.note, r.name, r.email, r.phone
     FROM booking_dates d
     LEFT JOIN booking_date_notes n ON n.hall = d.hall AND n.event_date = d.event_date
     LEFT JOIN booking_requests r ON r.id = d.request_id
     ORDER BY d.event_date`).all<DateRow>();
-  const overrides = new Map((dynamic.results ?? []).map((row) => [`${row.hall}:${row.date}`, row]));
+  const overrides = new Map((dynamic.results ?? []).map((row: DateRow) => [`${row.hall}:${row.date}`, row]));
   const imported = (Object.keys(legacy.locations) as HallKey[]).flatMap((hall) => {
     const values = legacy.locations[hall];
     return [
@@ -26,7 +34,7 @@ export async function GET(request: Request) {
       ...values.reserved.filter((date) => !overrides.has(`${hall}:${date}`)).map((date) => ({ id: `legacy-${hall}-${date}`, location: hall, date, status: "reserved", source: "legacy" })),
     ];
   });
-  const current = (dynamic.results ?? []).filter((row) => row.status !== "released").map((row) => ({ ...row, id: `${row.hall}-${row.date}`, location: row.hall }));
+  const current = (dynamic.results ?? []).filter((row: DateRow) => row.status !== "released").map((row: DateRow) => ({ ...row, id: `${row.hall}-${row.date}`, location: row.hall }));
   return Response.json({ dates: [...imported, ...current].sort((a, b) => a.date.localeCompare(b.date)) });
 }
 
@@ -49,7 +57,7 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   if (!await isAdminRequest(request)) return unauthorized();
   const url = new URL(request.url); const hall = url.searchParams.get("location") ?? ""; const date = url.searchParams.get("date") ?? "";
-  if (!["event", "garden"].includes(hall) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return Response.json({ error: "Ungültiger Termin." }, { status: 400 });
+  if (!["event", "garden"].includes(hall) || !validDate(date)) return Response.json({ error: "Ungültiger Termin." }, { status: 400 });
   const database = await ensureBookingTables();
   await database.batch([
     database.prepare("INSERT INTO booking_dates (hall, event_date, status, request_id, source) VALUES (?, ?, 'released', '', 'admin') ON CONFLICT(hall, event_date) DO UPDATE SET status = 'released', request_id = '', source = 'admin'").bind(hall, date),

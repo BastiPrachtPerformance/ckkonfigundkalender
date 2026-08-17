@@ -7,7 +7,7 @@ type RequestRow = {
 
 function present(row: RequestRow) {
   let saved: Record<string, unknown> = {};
-  try { saved = JSON.parse(row.configuration); } catch {}
+  try { saved = JSON.parse(row.configuration); } catch { saved = {}; }
   const config = { ...saved, hall: row.hall, date: row.event_date, guestCount: row.guest_count };
   return {
     id: row.id, name: row.name, email: row.email, phone: row.phone,

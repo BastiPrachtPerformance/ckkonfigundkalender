@@ -4,6 +4,8 @@ import defaultPricing from "../data/booking/pricing.json";
 
 const PRICING_KEY = "pricing";
 const encoder = new TextEncoder();
+const ADMIN_COOKIE_NAME = "ck_admin_session";
+const ADMIN_SESSION_SECONDS = 12 * 60 * 60;
 
 export async function ensureBookingTables() {
   const database = getD1();
@@ -63,6 +65,50 @@ export async function saveBookingPricing(value: unknown) {
   return value;
 }
 
+type PricingEntry = { label?: unknown; price?: unknown; perGuest?: unknown; note?: unknown };
+
+function validPriceEntry(value: unknown) {
+  if (!value || typeof value !== "object") return false;
+  const entry = value as PricingEntry;
+  const validAmount = (amount: unknown) => amount === undefined || (typeof amount === "number" && Number.isFinite(amount) && amount >= 0);
+  return typeof entry.label === "string"
+    && entry.label.trim().length > 0
+    && entry.label.length <= 200
+    && validAmount(entry.price)
+    && validAmount(entry.perGuest)
+    && (entry.note === undefined || (typeof entry.note === "string" && entry.note.length <= 500));
+}
+
+export function validBookingPricing(value: unknown) {
+  if (!value || typeof value !== "object") return false;
+  const pricing = value as Record<string, unknown>;
+  const halls = pricing.halls as Record<string, unknown> | undefined;
+  const locations = pricing.locations as Record<string, unknown> | undefined;
+  const settings = pricing.settings as Record<string, unknown> | undefined;
+  if (!halls || !locations || !settings) return false;
+  if (typeof settings.calendlyUrl !== "string" || typeof settings.bookingTitle !== "string" || typeof settings.bookingText !== "string" || typeof settings.priceDisclaimer !== "string") return false;
+  try {
+    const calendly = new URL(settings.calendlyUrl);
+    if (calendly.protocol !== "https:" || !/(^|\.)calendly\.com$/i.test(calendly.hostname)) return false;
+  } catch {
+    return false;
+  }
+  return ["event", "garden"].every((hall) => {
+    const hallInfo = halls[hall] as Record<string, unknown> | undefined;
+    const location = locations[hall] as Record<string, unknown> | undefined;
+    const rules = location?.rules as Record<string, unknown> | undefined;
+    const base = location?.baseByDay as Record<string, unknown> | undefined;
+    if (!hallInfo || typeof hallInfo.name !== "string" || !location || !rules || !base) return false;
+    const min = Number(rules.minGuests); const max = Number(rules.maxGuests);
+    if (!Number.isFinite(min) || !Number.isFinite(max) || min < 1 || max < min || max > 5000) return false;
+    if (!["friday", "saturday", "sunday", "weekday"].every((day) => Number.isFinite(Number(base[day])) && Number(base[day]) >= 0)) return false;
+    return ["menu", "drinks", "midnight", "extras"].every((group) => {
+      const entries = location[group] as Record<string, unknown> | undefined;
+      return entries && Object.keys(entries).length > 0 && Object.values(entries).every(validPriceEntry);
+    });
+  });
+}
+
 export async function resetBookingPricing() {
   const database = await ensureBookingTables();
   await database.prepare("DELETE FROM booking_settings WHERE key = ?").bind(PRICING_KEY).run();
@@ -79,6 +125,13 @@ function runtimeSecrets() {
 
 async function digest(value: string) {
   return new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(value)));
+}
+
+async function constantTimeTextEqual(leftValue: string, rightValue: string) {
+  const [left, right] = await Promise.all([digest(leftValue), digest(rightValue)]);
+  let difference = 0;
+  for (let index = 0; index < left.length; index += 1) difference |= left[index] ^ right[index];
+  return difference === 0;
 }
 
 export async function matchesAdminPassword(value: string) {
@@ -99,18 +152,34 @@ async function signature(payload: string) {
 }
 
 export async function createAdminToken() {
-  const payload = `${Date.now() + 12 * 60 * 60 * 1000}.${crypto.randomUUID()}`;
+  const payload = `${Date.now() + ADMIN_SESSION_SECONDS * 1000}.${crypto.randomUUID()}`;
   return `${payload}.${await signature(payload)}`;
+}
+
+function readCookie(request: Request) {
+  const cookies = request.headers.get("cookie") ?? "";
+  const value = cookies.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${ADMIN_COOKIE_NAME}=`));
+  return value?.slice(ADMIN_COOKIE_NAME.length + 1) ?? "";
 }
 
 export async function isAdminRequest(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
-  const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+  const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : readCookie(request);
   const parts = token.split(".");
   if (parts.length !== 3 || Number(parts[0]) < Date.now()) return false;
   const payload = `${parts[0]}.${parts[1]}`;
   const expected = await signature(payload);
-  return Boolean(expected) && expected === parts[2];
+  return Boolean(expected) && await constantTimeTextEqual(parts[2], expected);
+}
+
+export function adminCookie(token: string, request: Request) {
+  const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
+  return `${ADMIN_COOKIE_NAME}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${ADMIN_SESSION_SECONDS}${secure}`;
+}
+
+export function clearAdminCookie(request: Request) {
+  const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
+  return `${ADMIN_COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure}`;
 }
 
 export function unauthorized() {

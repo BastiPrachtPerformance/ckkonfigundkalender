@@ -1,91 +1,67 @@
 import assert from "node:assert/strict";
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
-const templateRoot = new URL("../", import.meta.url);
-const previewRoot = new URL("../app/_sites-preview/", import.meta.url);
+const root = new URL("../", import.meta.url);
+const read = (path) => readFile(new URL(path, root), "utf8");
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
-}
-
-test("server-renders the starter loading skeleton", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
-  assert.match(html, developmentPreviewMeta);
-  assert.match(html, /<title>Your site is taking shape<\/title>/i);
-  assert.match(html, /Building your site/);
-  assert.match(html, /Your site is taking shape/);
-  assert.match(
-    html,
-    /Your first version will appear here automatically when it’s ready\./,
-  );
-  assert.doesNotMatch(html, /Codex/);
-  assert.match(html, /react-loading-skeleton/);
-  assert.match(html, /role="status"/);
+test("build output and required public assets exist", async () => {
+  await Promise.all([
+    access(new URL("dist/server/index.js", root)),
+    access(new URL("public/ck-eventcenter-logo.png", root)),
+    access(new URL("public/buchung-event.avif", root)),
+    access(new URL("public/buchung-garden.avif", root)),
+    access(new URL("public/verwaltung.html", root)),
+  ]);
 });
 
-test("keeps the loading skeleton scoped and disposable", async () => {
-  const [preview, css, page, layout, packageJson, files] = await Promise.all([
-    readFile(new URL("SkeletonPreview.tsx", previewRoot), "utf8"),
-    readFile(new URL("preview.css", previewRoot), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readdir(previewRoot),
+test("booking data contains valid, unique dates and complete pricing", async () => {
+  const [availability, pricing] = await Promise.all([
+    read("data/booking/availability.json").then(JSON.parse),
+    read("data/booking/pricing.json").then(JSON.parse),
   ]);
 
-  assert.deepEqual(files.sort(), ["SkeletonPreview.tsx", "preview.css"]);
-  assert.match(preview, /from "react-loading-skeleton"/);
-  assert.match(preview, /baseColor="#eceae7"/);
-  assert.match(preview, /highlightColor="#f9f8f6"/);
-  assert.match(preview, /duration=\{2\.8\}/);
-  assert.match(preview, /sites-skeleton-search-placeholder/);
-  assert.match(packageJson, /"react-loading-skeleton": "3\.5\.0"/);
+  for (const hall of ["event", "garden"]) {
+    const dates = [...availability.locations[hall].blocked, ...availability.locations[hall].reserved];
+    assert.equal(new Set(dates).size, dates.length, `${hall} enthält doppelte Termine`);
+    for (const value of dates) {
+      assert.match(value, /^\d{4}-\d{2}-\d{2}$/);
+      const [year, month, day] = value.split("-").map(Number);
+      const parsed = new Date(Date.UTC(year, month - 1, day));
+      assert.equal(parsed.toISOString().slice(0, 10), value, `${value} ist kein gültiges Datum`);
+    }
+    assert.ok(pricing.halls[hall]);
+    assert.ok(pricing.locations[hall]);
+  }
+  assert.match(pricing.settings.calendlyUrl, /^https:\/\/calendly\.com\//);
+});
 
-  const shellIndex = preview.indexOf('className="sites-skeleton-shell"');
-  const statusIndex = preview.indexOf('className="sites-skeleton-status"');
-  assert.ok(shellIndex >= 0 && statusIndex > shellIndex);
-  assert.match(css, /position:\s*fixed/);
-  assert.match(css, /inset:\s*0/);
-  assert.match(css, /opacity:\s*0\.52/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /#020617|canvas|pets|progress/i);
-  assert.doesNotMatch(
-    preview,
-    /loading-spinner|status-mark|status-progress|canvas|cookie|random/i,
-  );
+test("reservation and deletion logic preserve calendar integrity", async () => {
+  const [bookingRoute, deleteRoute] = await Promise.all([
+    read("app/api/buchung/route.ts"),
+    read("app/api/admin/requests/[id]/route.ts"),
+  ]);
 
-  assert.match(page, /export const metadata:\s*Metadata/);
-  assert.match(page, /"codex-preview": "development"/);
-  assert.match(page, /<SkeletonPreview \/>/);
-  assert.match(layout, /title:\s*"Starter Project"/);
-  assert.doesNotMatch(layout, /codex-preview|_sites-preview|themeColor|\bViewport\b/);
-  assert.doesNotMatch(css, /(^|\s)(html|body)\s*\{/m);
+  assert.match(bookingRoute, /consumeRateLimit\(request, "booking-submit"/);
+  assert.match(bookingRoute, /INSERT INTO booking_dates[^\n]+VALUES \(\?, \?, 'reserved', \?, 'customer'\)"/);
+  assert.doesNotMatch(bookingRoute, /DO UPDATE SET status = 'reserved'/);
+  assert.doesNotMatch(bookingRoute, /releaseExpiredReservations|RESERVATION_HOURS|expiresAt/);
+  assert.match(deleteRoute, /UPDATE booking_dates SET status = 'released'/);
+  assert.match(deleteRoute, /DELETE FROM booking_requests/);
+});
 
-  await assert.rejects(
-    access(new URL("public/_sites-preview", templateRoot)),
-  );
+test("customer-facing legal pages contain operational information, not starter placeholders", async () => {
+  const [privacy, terms, imprint, booking] = await Promise.all([
+    read("app/datenschutz/page.tsx"),
+    read("app/agb/page.tsx"),
+    read("app/impressum/page.tsx"),
+    read("app/buchung/BookingConfigurator.tsx"),
+  ]);
+
+  assert.doesNotMatch(`${privacy}\n${terms}`, /Mustertext|vor der endgültigen Veröffentlichung|rechtlich vervollständigt/i);
+  assert.match(privacy, /Calendly/);
+  assert.match(privacy, /manuell freigegeben/);
+  assert.match(terms, /unverbindliche Schätzungen/);
+  assert.match(imprint, /§ 5 DDG/);
+  assert.match(booking, /Datenschutzerklärung/);
 });

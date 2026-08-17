@@ -15,6 +15,13 @@
       "when": 1786046849972,
       "tag": "0001_melted_ezekiel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786945391993,
+      "tag": "0002_peaceful_joshua_kane",
+      "breakpoints": true
     }
   ]
 }

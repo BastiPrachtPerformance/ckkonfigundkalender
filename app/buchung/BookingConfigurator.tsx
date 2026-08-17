@@ -19,10 +19,11 @@ type Pricing = {
   locations: Record<HallKey, LocationPricing>;
 };
 type BusyDate = { hall: HallKey; date: string; status: "blocked" | "reserved" };
+type BookingData = { dates?: BusyDate[]; pricing?: Pricing };
+type ReservationData = { error?: string; code: string; total: number };
 
 const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const weekdays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
-const dayLabels: Record<DayKey, string> = { friday: "Freitag", saturday: "Samstag", sunday: "Sonntag", weekday: "Montag bis Donnerstag" };
 const hallImages: Record<HallKey, string> = { event: "/buchung-event.avif", garden: "/buchung-garden.avif" };
 
 function formatEuro(value: number) {
@@ -61,6 +62,7 @@ export function BookingConfigurator({ pricing: initialPricing }: { pricing: Pric
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
   const [loadingCalendar, setLoadingCalendar] = useState(true);
+  const [calendarFailed, setCalendarFailed] = useState(false);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [reservation, setReservation] = useState<{ code: string; total: number } | null>(null);
@@ -68,39 +70,47 @@ export function BookingConfigurator({ pricing: initialPricing }: { pricing: Pric
   const location = pricing.locations[hall];
   const selectedDay = date ? getDayKey(date) : "friday";
   const minimumGuests = Number(location.rules.minGuestsByDay[selectedDay] ?? location.rules.minGuests);
+  const effectiveGuestCount = Math.min(location.rules.maxGuests, Math.max(minimumGuests, Number.isFinite(guestCount) ? guestCount : minimumGuests));
 
   useEffect(() => {
     let active = true;
-    fetch("/api/buchung")
-      .then((response) => response.ok ? response.json() : Promise.reject())
+    fetch("/api/buchung", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() as Promise<BookingData> : Promise.reject())
       .then((data) => { if (active) { setBusyDates(data.dates ?? []); if (data.pricing) setPricing(data.pricing); } })
-      .catch(() => { if (active) setMessage("Der Kalender konnte gerade nicht vollständig geladen werden."); })
+      .catch(() => { if (active) setCalendarFailed(true); })
       .finally(() => { if (active) setLoadingCalendar(false); });
     return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    if (date && busyDates.some((entry) => entry.hall === hall && entry.date === date)) setDate("");
-  }, [hall, busyDates, date]);
-
-  useEffect(() => {
-    if (guestCount < minimumGuests) setGuestCount(minimumGuests);
-    if (guestCount > location.rules.maxGuests) setGuestCount(location.rules.maxGuests);
-  }, [minimumGuests, location.rules.maxGuests, guestCount]);
+  async function retryCalendar() {
+    setLoadingCalendar(true);
+    setCalendarFailed(false);
+    try {
+      const response = await fetch("/api/buchung", { cache: "no-store" });
+      if (!response.ok) throw new Error("Kalender nicht verfügbar");
+      const data = await response.json() as BookingData;
+      setBusyDates(data.dates ?? []);
+      if (data.pricing) setPricing(data.pricing);
+    } catch {
+      setCalendarFailed(true);
+    } finally {
+      setLoadingCalendar(false);
+    }
+  }
 
   const total = useMemo(() => {
-    const itemTotal = (item?: PriceEntry) => item ? (Number(item.price) || 0) + (Number(item.perGuest) || 0) * guestCount : 0;
+    const itemTotal = (item?: PriceEntry) => item ? (Number(item.price) || 0) + (Number(item.perGuest) || 0) * effectiveGuestCount : 0;
     return (Number(location.baseByDay[selectedDay]) || 0)
       + itemTotal(location.menu[menu])
       + itemTotal(location.drinks[drinks])
       + itemTotal(location.midnight[midnight])
       + extras.reduce((sum, key) => sum + itemTotal(location.extras[key]), 0);
-  }, [location, selectedDay, menu, drinks, midnight, extras, guestCount]);
+  }, [location, selectedDay, menu, drinks, midnight, extras, effectiveGuestCount]);
 
   const summaryRows = [
     ["Saal", pricing.halls[hall].name],
     ["Hochzeit", date ? formatDate(date) : "Noch nicht gewählt"],
-    ["Gäste", String(guestCount)],
+    ["Gäste", String(effectiveGuestCount)],
     ["Grundpreis", formatEuro(Number(location.baseByDay[selectedDay]) || 0)],
     ["Verpflegung", location.menu[menu]?.label ?? "–"],
     ["Zusatzleistungen", extras.length ? extras.map((key) => location.extras[key]?.label).join(", ") : "Keine"],
@@ -112,6 +122,16 @@ export function BookingConfigurator({ pricing: initialPricing }: { pricing: Pric
     const minimum = Number(location.rules.minGuestsByDay[key] ?? location.rules.minGuests);
     setGuestCount((current) => Math.max(current, minimum));
     setMessage("");
+  }
+
+  function selectHall(value: HallKey) {
+    const nextLocation = pricing.locations[value];
+    const nextDay = date ? getDayKey(date) : "friday";
+    const nextMinimum = Number(nextLocation.rules.minGuestsByDay[nextDay] ?? nextLocation.rules.minGuests);
+    setHall(value);
+    setExtras([]);
+    setGuestCount((current) => Math.min(nextLocation.rules.maxGuests, Math.max(nextMinimum, Number.isFinite(current) ? current : nextMinimum)));
+    if (date && busyDates.some((entry) => entry.hall === value && entry.date === date)) setDate("");
   }
 
   function next() {
@@ -136,11 +156,11 @@ export function BookingConfigurator({ pricing: initialPricing }: { pricing: Pric
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name, email, phone, date, hall, guestCount, notes,
+          name, email, phone, date, hall, guestCount: effectiveGuestCount, notes,
           configuration: { menu, drinks, midnight, extras },
         }),
       });
-      const data = await response.json();
+      const data = await response.json() as ReservationData;
       if (!response.ok) throw new Error(data.error || "Die Vorreservierung ist fehlgeschlagen.");
       setReservation({ code: data.code, total: data.total });
       setMessage("");
@@ -153,7 +173,7 @@ export function BookingConfigurator({ pricing: initialPricing }: { pricing: Pric
   }
 
   const calendlyUrl = reservation
-    ? `${pricing.settings.calendlyUrl}?hide_gdpr_banner=1&background_color=faf8ef&text_color=07110d&primary_color=c9a75f&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&a1=${encodeURIComponent(reservation.code)}`
+    ? `${pricing.settings.calendlyUrl}?background_color=faf8ef&text_color=07110d&primary_color=c9a75f&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&a1=${encodeURIComponent(reservation.code)}`
     : "";
 
   return (
@@ -172,7 +192,7 @@ export function BookingConfigurator({ pricing: initialPricing }: { pricing: Pric
             <p className="kicker">Schritt 01 / Saal</p>
             <h2>Wo soll Ihr Fest<br /><em>Geschichte schreiben?</em></h2>
             <div className="hall-choices">
-              {(Object.keys(pricing.halls) as HallKey[]).map((key) => <button type="button" key={key} className={`hall-choice ${hall === key ? "selected" : ""}`} onClick={() => { setHall(key); setExtras([]); }}>
+              {(Object.keys(pricing.halls) as HallKey[]).map((key) => <button type="button" key={key} className={`hall-choice ${hall === key ? "selected" : ""}`} onClick={() => selectHall(key)}>
                 <img src={hallImages[key]} alt={pricing.halls[key].name} />
                 <span><small>{key === "event" ? "Bis 1.000 Gäste" : "Bis 300 Gäste"}</small><strong>{pricing.halls[key].name}</strong><em>{pricing.halls[key].perks}</em></span>
               </button>)}
@@ -182,22 +202,22 @@ export function BookingConfigurator({ pricing: initialPricing }: { pricing: Pric
           {step === 1 && <div className="configurator-step">
             <p className="kicker">Schritt 02 / Hochzeitsdatum</p>
             <h2>Wann beginnt<br /><em>Ihr für immer?</em></h2>
-            <Calendar month={calendarMonth} setMonth={setCalendarMonth} hall={hall} busyDates={busyDates} selected={date} onSelect={selectDate} loading={loadingCalendar} />
-            <div className="guest-field"><label htmlFor="guestCount">Anzahl der Gäste</label><div><button type="button" onClick={() => setGuestCount(Math.max(minimumGuests, guestCount - 10))}>−</button><input id="guestCount" type="number" min={minimumGuests} max={location.rules.maxGuests} value={guestCount} onChange={(event) => setGuestCount(Number(event.target.value))} /><button type="button" onClick={() => setGuestCount(Math.min(location.rules.maxGuests, guestCount + 10))}>+</button></div><small>{selectedDay === "saturday" && hall === "event" ? "Samstags gilt im CK Eventcenter eine Mindestzahl von 600 Gästen." : `Möglich sind ${minimumGuests} bis ${location.rules.maxGuests} Gäste.`}</small></div>
+            <Calendar month={calendarMonth} setMonth={setCalendarMonth} hall={hall} busyDates={busyDates} selected={date} onSelect={selectDate} loading={loadingCalendar} failed={calendarFailed} retry={retryCalendar} />
+            <div className="guest-field"><label htmlFor="guestCount">Anzahl der Gäste</label><div><button type="button" onClick={() => setGuestCount(Math.max(minimumGuests, effectiveGuestCount - 10))}>−</button><input id="guestCount" type="number" min={minimumGuests} max={location.rules.maxGuests} value={guestCount} onChange={(event) => setGuestCount(Number(event.target.value))} onBlur={() => setGuestCount(effectiveGuestCount)} /><button type="button" onClick={() => setGuestCount(Math.min(location.rules.maxGuests, effectiveGuestCount + 10))}>+</button></div><small>{selectedDay === "saturday" && hall === "event" ? "Samstags gilt im CK Eventcenter eine Mindestzahl von 600 Gästen." : `Möglich sind ${minimumGuests} bis ${location.rules.maxGuests} Gäste.`}</small></div>
           </div>}
 
           {step === 2 && <div className="configurator-step">
             <p className="kicker">Schritt 03 / Genuss</p>
             <h2>Was dürfen wir<br /><em>für Sie servieren?</em></h2>
-            <OptionGroup title="Menü" items={location.menu} selected={[menu]} onChange={setMenu} guestCount={guestCount} />
-            <OptionGroup title="Getränke" items={location.drinks} selected={[drinks]} onChange={setDrinks} guestCount={guestCount} />
-            <OptionGroup title="Mitternacht" items={location.midnight} selected={[midnight]} onChange={setMidnight} guestCount={guestCount} />
+            <OptionGroup title="Menü" items={location.menu} selected={[menu]} onChange={setMenu} guestCount={effectiveGuestCount} />
+            <OptionGroup title="Getränke" items={location.drinks} selected={[drinks]} onChange={setDrinks} guestCount={effectiveGuestCount} />
+            <OptionGroup title="Mitternacht" items={location.midnight} selected={[midnight]} onChange={setMidnight} guestCount={effectiveGuestCount} />
           </div>}
 
           {step === 3 && <div className="configurator-step">
             <p className="kicker">Schritt 04 / Details</p>
             <h2>Die Momente<br /><em>dazwischen.</em></h2>
-            <OptionGroup title="Zusatzleistungen" items={location.extras} selected={extras} multiple onChange={(key) => setExtras((current) => current.includes(key) ? current.filter((item) => item !== key) : [...current, key])} guestCount={guestCount} />
+            <OptionGroup title="Zusatzleistungen" items={location.extras} selected={extras} multiple onChange={(key) => setExtras((current) => current.includes(key) ? current.filter((item) => item !== key) : [...current, key])} guestCount={effectiveGuestCount} />
             <label className="booking-notes">Wünsche und Hinweise<textarea rows={4} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Was sollten wir für Ihren besonderen Tag noch wissen?" /></label>
           </div>}
 
@@ -212,10 +232,11 @@ export function BookingConfigurator({ pricing: initialPricing }: { pricing: Pric
                 <label>Telefon<input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" /></label>
                 <label>Hochzeitsdatum<input value={date ? formatDate(date) : ""} readOnly /></label>
               </div>
+              <p className="booking-privacy">Mit dem Absenden verarbeiten wir Ihre Angaben zur Bearbeitung der Vorreservierung. Weitere Informationen finden Sie in unserer <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p>
               <button className="reservation-button" type="button" disabled={submitting} onClick={submit}>{submitting ? "Wird vorreserviert …" : "Datum vorreservieren & Beratung wählen"}<span>↗</span></button>
             </> : <div className="reservation-success">
               <span>Datum vorreserviert</span><h3>{formatDate(date)}</h3><p>Ihre Buchungsnummer: <strong>{reservation.code}</strong></p><p>Ihre Zusammenstellung ist bei uns eingegangen. Wählen Sie jetzt Ihren Beratungstermin.</p>
-              <div className="calendly-frame"><iframe src={calendlyUrl} title="Beratungsgespräch auswählen" /></div>
+              <div className="calendly-frame"><iframe src={calendlyUrl} title="Beratungsgespräch auswählen" loading="lazy" referrerPolicy="strict-origin-when-cross-origin" /></div>
             </div>}
           </div>}
 
@@ -248,22 +269,28 @@ function OptionGroup({ title, items, selected, multiple = false, onChange, guest
   })}</div></fieldset>;
 }
 
-function Calendar({ month, setMonth, hall, busyDates, selected, onSelect, loading }: { month: Date; setMonth: (date: Date) => void; hall: HallKey; busyDates: BusyDate[]; selected: string; onSelect: (date: string) => void; loading: boolean }) {
+function Calendar({ month, setMonth, hall, busyDates, selected, onSelect, loading, failed, retry }: { month: Date; setMonth: (date: Date) => void; hall: HallKey; busyDates: BusyDate[]; selected: string; onSelect: (date: string) => void; loading: boolean; failed: boolean; retry: () => Promise<void> }) {
   const year = month.getFullYear();
   const monthIndex = month.getMonth();
   const firstOffset = (new Date(year, monthIndex, 1).getDay() + 6) % 7;
   const dayCount = new Date(year, monthIndex + 1, 0).getDate();
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const previousDisabled = month.getTime() <= currentMonth.getTime();
   const cells = Array.from({ length: firstOffset + dayCount }, (_, index) => index < firstOffset ? null : index - firstOffset + 1);
 
-  return <div className="booking-calendar">
-    <div className="calendar-heading"><button type="button" aria-label="Vorheriger Monat" onClick={() => setMonth(new Date(year, monthIndex - 1, 1))}>←</button><strong>{months[monthIndex]} {year}</strong><button type="button" aria-label="Nächster Monat" onClick={() => setMonth(new Date(year, monthIndex + 1, 1))}>→</button></div>
+  return <div className="booking-calendar" aria-busy={loading}>
+    <div className="calendar-heading"><button type="button" aria-label="Vorheriger Monat" disabled={previousDisabled} onClick={() => setMonth(new Date(year, monthIndex - 1, 1))}>←</button><strong>{months[monthIndex]} {year}</strong><button type="button" aria-label="Nächster Monat" onClick={() => setMonth(new Date(year, monthIndex + 1, 1))}>→</button></div>
+    {loading && <p className="calendar-status" role="status">Freie Termine werden geladen …</p>}
+    {failed && <div className="calendar-status error" role="alert">Der Kalender konnte nicht geladen werden. <button type="button" onClick={() => void retry()}>Erneut versuchen</button></div>}
     <div className="calendar-grid">{weekdays.map((day) => <span className="weekday" key={day}>{day}</span>)}{cells.map((day, index) => {
       if (!day) return <span className="empty" key={`empty-${index}`} />;
       const value = `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
       const busy = busyDates.find((entry) => entry.hall === hall && entry.date === value);
-      const unavailable = value < today || Boolean(busy) || loading;
-      return <button type="button" key={value} className={`${busy?.status ?? "free"} ${selected === value ? "selected" : ""}`} disabled={unavailable} onClick={() => onSelect(value)} aria-label={`${value}${busy ? ", nicht verfügbar" : ", verfügbar"}`}>{day}</button>;
+      const unavailable = value < today || Boolean(busy) || loading || failed;
+      const availabilityLabel = loading ? ", Kalender wird geladen" : failed ? ", derzeit nicht auswählbar" : busy ? ", nicht verfügbar" : ", verfügbar";
+      return <button type="button" key={value} className={`${busy?.status ?? "free"} ${selected === value ? "selected" : ""}`} disabled={unavailable} onClick={() => onSelect(value)} aria-label={`${value}${availabilityLabel}`}>{day}</button>;
     })}</div>
     <div className="calendar-legend"><span><i className="free" />Frei</span><span><i className="reserved" />Vorreserviert</span><span><i className="blocked" />Belegt</span></div>
     {selected && <p className="selected-wedding-date">Gewählt: <strong>{formatDate(selected)}</strong></p>}
