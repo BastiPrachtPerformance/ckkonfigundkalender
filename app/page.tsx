@@ -47,8 +47,8 @@ export default function Home() {
 
       <section className="statement-band">
         <div className="marquee-track">
-          <span>Feiern</span><span className="star">✦</span><em>Lieben</em><span className="star">✦</span><span>Erinnern</span><span className="star">✦</span>
-          <span aria-hidden="true">Feiern</span><span className="star" aria-hidden="true">✦</span><em aria-hidden="true">Lieben</em><span className="star" aria-hidden="true">✦</span><span aria-hidden="true">Erinnern</span><span className="star" aria-hidden="true">✦</span>
+          <div className="marquee-group"><span>Feiern</span><span className="star">✦</span><em>Lieben</em><span className="star">✦</span><span>Erinnern</span><span className="star">✦</span></div>
+          <div className="marquee-group" aria-hidden="true"><span>Feiern</span><span className="star">✦</span><em>Lieben</em><span className="star">✦</span><span>Erinnern</span><span className="star">✦</span></div>
         </div>
       </section>
 

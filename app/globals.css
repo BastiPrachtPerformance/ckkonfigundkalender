@@ -93,8 +93,9 @@ em { font-weight: 400; }
 .portal-copy > span { display: inline-block; margin-top: 35px; padding-bottom: 13px; border-bottom: 1px solid currentColor; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 
 .statement-band { display: flex; align-items: center; min-height: 155px; overflow: hidden; color: var(--wine); background: var(--gold-light); font: 500 clamp(45px, 6vw, 85px) var(--font-display); white-space: nowrap; }
-.marquee-track { display: flex; align-items: center; gap: 3vw; width: max-content; padding-right: 3vw; animation: marquee 24s linear infinite; will-change: transform; }
-@keyframes marquee { to { transform: translateX(-50%); } }
+.marquee-track { display: flex; width: max-content; animation: marquee 24s linear infinite; will-change: transform; }
+.marquee-group { display: flex; flex-shrink: 0; align-items: center; justify-content: space-around; gap: 3vw; min-width: 100vw; padding-right: 3vw; }
+@keyframes marquee { to { transform: translate3d(-50%, 0, 0); } }
 .statement-band em { font-weight: 400; }
 .statement-band .star { font-size: .35em; }
 
