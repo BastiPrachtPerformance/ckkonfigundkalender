@@ -43,6 +43,19 @@ export const bookingDateNotes = sqliteTable("booking_date_notes", {
   uniqueIndex("idx_booking_date_notes_hall_event_date").on(table.hall, table.eventDate),
 ]);
 
+export const bookingDateDetails = sqliteTable("booking_date_details", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  hall: text("hall").notNull(),
+  eventDate: text("event_date").notNull(),
+  customerName: text("customer_name").notNull().default(""),
+  customerEmail: text("customer_email").notNull().default(""),
+  customerPhone: text("customer_phone").notNull().default(""),
+  note: text("note").notNull().default(""),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  uniqueIndex("idx_booking_date_details_hall_event_date").on(table.hall, table.eventDate),
+]);
+
 export const requestRateLimits = sqliteTable("request_rate_limits", {
   scope: text("scope").notNull(),
   clientKey: text("client_key").notNull(),

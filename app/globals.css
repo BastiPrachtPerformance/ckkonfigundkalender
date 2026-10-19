@@ -11,6 +11,11 @@
   --paper: #faf8ef;
   --sage: #8ca68f;
   --line: rgba(10, 48, 32, .18);
+  --green: var(--wine);
+  --cream: var(--paper);
+  --muted: #675c58;
+  --gold-dark: #a88642;
+  --page-x: 5vw;
 }
 
 * { box-sizing: border-box; }
@@ -574,6 +579,84 @@ em { font-weight: 400; }
   .guest-field > div { justify-self: start; }
   .configuration-summary { padding: 40px 22px; }
   .calendly-frame iframe { height: 650px; }
+}
+
+/* Beratung und öffentlicher Belegungskalender */
+.consultation-page { background: var(--cream); }
+.consultation-intro { display: grid; grid-template-columns: 1.2fr .8fr; align-items: end; gap: 8vw; padding: 170px var(--page-x) 90px; }
+.consultation-intro h1 { margin-top: 20px; font-size: clamp(60px, 8vw, 122px); line-height: .83; }
+.consultation-intro h1 em, .consultation-copy h2 em, .public-availability h2 em { color: var(--gold-dark); }
+.consultation-intro-copy { padding-bottom: 10px; }
+.consultation-intro-copy p { max-width: 520px; color: var(--muted); font-size: 14px; line-height: 1.9; }
+.text-link { display: inline-flex; gap: 20px; margin-top: 18px; padding-bottom: 7px; border-bottom: 1px solid var(--black); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.consultation-layout { display: grid; grid-template-columns: minmax(280px,.62fr) minmax(0,1.38fr); gap: 5vw; padding: 80px var(--page-x) 120px; background: #ece8dc; }
+.consultation-copy { padding-top: 35px; }
+.consultation-copy h2 { margin: 18px 0 38px; font-size: clamp(44px, 5vw, 76px); line-height: .92; }
+.consultation-copy ul { display: grid; gap: 0; padding: 0; list-style: none; border-top: 1px solid rgba(7,17,13,.18); }
+.consultation-copy li { display: grid; grid-template-columns: 45px 1fr; gap: 16px; padding: 20px 0; border-bottom: 1px solid rgba(7,17,13,.18); font-size: 12px; line-height: 1.5; }
+.consultation-copy li span { color: var(--gold-dark); font-weight: 800; }
+.consultation-note { margin-top: 30px; color: var(--muted); font-size: 11px; line-height: 1.8; }
+.consultation-note a { color: var(--black); text-decoration: underline; text-underline-offset: 3px; }
+.calendly-frame { min-height: 780px; overflow: hidden; border: 1px solid rgba(7,17,13,.13); border-radius: 3px; background: #faf8ef; box-shadow: 0 24px 70px rgba(7,17,13,.09); }
+.calendly-frame iframe { display: block; width: 100%; min-height: 780px; border: 0; }
+.public-availability { padding: 110px var(--page-x); background: #f4f1e7; }
+.availability-heading { display: grid; grid-template-columns: 1fr .65fr; align-items: end; gap: 8vw; margin-bottom: 55px; }
+.availability-heading h2 { margin-top: 18px; font-size: clamp(58px, 7vw, 106px); line-height: .82; }
+.availability-heading > p { max-width: 480px; margin-bottom: 6px; color: var(--muted); font-size: 13px; line-height: 1.9; }
+.availability-shell { padding: clamp(20px,4vw,55px); border: 1px solid rgba(7,17,13,.14); background: #fffdf7; box-shadow: 0 24px 75px rgba(7,17,13,.07); }
+.availability-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 580px; margin: 0 auto 38px; }
+.availability-tabs button { min-height: 52px; border: 1px solid rgba(7,17,13,.18); color: var(--black); background: transparent; font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; cursor: pointer; }
+.availability-tabs button.active { color: white; border-color: var(--green); background: var(--green); }
+.availability-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+.availability-toolbar strong { font: italic clamp(26px,3vw,42px)/1 var(--font-display); text-transform: capitalize; }
+.availability-toolbar button { width: 48px; height: 48px; border: 1px solid rgba(7,17,13,.18); border-radius: 50%; color: var(--black); background: transparent; cursor: pointer; }
+.availability-toolbar button:disabled { cursor: default; opacity: .3; }
+.availability-calendar { display: grid; grid-template-columns: repeat(7,1fr); gap: 7px; transition: opacity .2s; }
+.availability-calendar.loading { opacity: .45; }
+.availability-weekday { padding: 10px 4px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-align: center; text-transform: uppercase; }
+.availability-day { min-height: 94px; padding: 13px; border: 1px solid rgba(7,17,13,.12); background: #faf8f1; }
+.availability-day strong, .availability-day small { display: block; }
+.availability-day strong { font: 23px/1 var(--font-display); }
+.availability-day small { margin-top: 25px; font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.availability-day.free { border-color: rgba(30,110,72,.25); background: #edf5ef; }
+.availability-day.free small { color: #28754e; }
+.availability-day.unavailable { color: #88514a; border-color: rgba(139,62,52,.22); background: #f6eae7; }
+.availability-day.past { color: #93968f; border-color: transparent; background: #efeee9; opacity: .65; }
+.availability-legend { display: flex; justify-content: center; gap: 28px; margin-top: 28px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.availability-legend span { display: flex; align-items: center; gap: 8px; }
+.availability-legend i { width: 11px; height: 11px; border-radius: 50%; }
+.availability-legend i.free { background: #8fb99f; }
+.availability-legend i.unavailable { background: #c38d84; }
+.availability-error { padding: 65px 20px; color: var(--muted); text-align: center; }
+.availability-error button { margin-top: 16px; padding: 12px 18px; border: 0; color: white; background: var(--green); }
+.availability-cta { display: flex; align-items: center; justify-content: space-between; gap: 35px; padding: 50px 0 0; }
+.availability-cta h3 { margin: 8px 0 0; font: italic clamp(32px,4vw,58px)/1 var(--font-display); }
+
+@media (max-width: 900px) {
+  .consultation-intro, .consultation-layout, .availability-heading { grid-template-columns: 1fr; }
+  .consultation-intro { padding-top: 140px; }
+  .consultation-layout { padding-top: 35px; }
+  .availability-heading { gap: 25px; }
+}
+
+@media (max-width: 650px) {
+  .consultation-intro { padding-top: 120px; padding-bottom: 55px; }
+  .consultation-intro h1 { font-size: 58px; }
+  .consultation-layout { padding-bottom: 80px; }
+  .calendly-frame, .calendly-frame iframe { min-height: 700px; }
+  .public-availability { padding-top: 80px; padding-bottom: 80px; }
+  .availability-heading h2 { font-size: 56px; }
+  .availability-shell { padding: 14px 9px 25px; }
+  .availability-tabs { margin-bottom: 25px; }
+  .availability-tabs button { min-height: 47px; font-size: 8px; }
+  .availability-toolbar { padding: 0 5px; }
+  .availability-toolbar strong { font-size: 25px; }
+  .availability-calendar { gap: 3px; }
+  .availability-weekday { font-size: 8px; }
+  .availability-day { min-height: 58px; padding: 7px 5px; }
+  .availability-day strong { font-size: 17px; }
+  .availability-day small { margin-top: 15px; font-size: 6px; letter-spacing: 0; }
+  .availability-cta { align-items: flex-start; flex-direction: column; }
 }
 
 /* Kompakte Navigation */

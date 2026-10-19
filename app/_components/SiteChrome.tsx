@@ -6,7 +6,7 @@ const mobileLinks = [
   ["/garden", "CK Garden"],
   ["/galerie", "Galerie"],
   ["/belegungsplan", "Belegungsplan"],
-  ["/buchung", "Buchung"],
+  ["/buchung", "Beratung"],
   ["/kontakt", "Kontakt"],
 ];
 
@@ -24,7 +24,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
         <a href="/galerie">Galerie</a>
         <a href="/belegungsplan">Termine</a>
         <a href="/kontakt">Kontakt</a>
-        <a className="nav-cta" href="/buchung">Buchung starten <span>↗</span></a>
+        <a className="nav-cta" href="/buchung">Beratung buchen <span>↗</span></a>
       </nav>
       <details className="mobile-menu">
         <summary aria-label="Menü öffnen"><span>Menü</span><b>＋</b></summary>
@@ -41,7 +41,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-booking-teaser">
         <div><p className="kicker">Ihr Fest beginnt hier</p><h2>Ein Datum.<br /><em>Ein Versprechen.</em></h2></div>
-        <div><p>Prüfen Sie freie Hochzeitstermine, stellen Sie Ihre Feier zusammen und sichern Sie sich anschließend Ihre persönliche Beratung.</p><a className="footer-booking-button" href="/buchung">Buchung beginnen <span>↗</span></a></div>
+        <div><p>Prüfen Sie freie Hochzeitstermine und buchen Sie anschließend Ihr persönliches Beratungsgespräch.</p><a className="footer-booking-button" href="/buchung">Beratung buchen <span>↗</span></a></div>
       </div>
       <div className="footer-grid">
         <div className="footer-identity"><Link className="brand footer-brand" href="/" aria-label="CK Eventcenter Startseite"><img className="brand-logo" src="/ck-eventcenter-logo.png" alt="" /></Link><p>Seit 2015 außergewöhnliche Hochzeiten und große Feiern in Bergkamen.</p></div>

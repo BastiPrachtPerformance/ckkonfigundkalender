@@ -1,12 +1,12 @@
-# CK Eventcenter – Website, Konfigurator und Verwaltung
+# CK Eventcenter – Website, Belegungskalender und Verwaltung
 
 Die Anwendung enthält die öffentliche CK-Eventcenter-Website, den Hochzeitskonfigurator, den Belegungskalender und die geschützten Verwaltungsbereiche.
 
 ## Wichtige Seiten
 
-- `/buchung` – Hochzeit konfigurieren, Datum vorreservieren und anschließend Calendly öffnen
+- `/buchung` – persönliches Beratungsgespräch direkt über Calendly buchen
 - `/belegungsplan` – Einstieg zum Hochzeitskalender
-- `/verwaltung` – Preise, Regeln, Anfragen und Hochzeitstermine verwalten
+- `/verwaltung` – Hochzeitstermine, Kundendaten und interne Notizen verwalten
 - `/hauptverwaltung` – gesamte öffentliche Seite aktivieren oder deaktivieren
 
 ## Betrieb

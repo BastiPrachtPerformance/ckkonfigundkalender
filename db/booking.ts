@@ -46,6 +46,17 @@ export async function ensureBookingTables() {
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
     )`),
     database.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_booking_date_notes_hall_event_date ON booking_date_notes (hall, event_date)"),
+    database.prepare(`CREATE TABLE IF NOT EXISTS booking_date_details (
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      hall TEXT NOT NULL,
+      event_date TEXT NOT NULL,
+      customer_name TEXT DEFAULT '' NOT NULL,
+      customer_email TEXT DEFAULT '' NOT NULL,
+      customer_phone TEXT DEFAULT '' NOT NULL,
+      note TEXT DEFAULT '' NOT NULL,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+    )`),
+    database.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_booking_date_details_hall_event_date ON booking_date_details (hall, event_date)"),
   ]);
   return database;
 }

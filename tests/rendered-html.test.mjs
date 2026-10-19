@@ -9,59 +9,62 @@ test("build output and required public assets exist", async () => {
   await Promise.all([
     access(new URL("dist/server/index.js", root)),
     access(new URL("public/ck-eventcenter-logo.png", root)),
-    access(new URL("public/buchung-event.avif", root)),
-    access(new URL("public/buchung-garden.avif", root)),
     access(new URL("public/verwaltung.html", root)),
   ]);
 });
 
-test("booking data contains valid, unique dates and complete pricing", async () => {
-  const [availability, pricing] = await Promise.all([
-    read("data/booking/availability.json").then(JSON.parse),
-    read("data/booking/pricing.json").then(JSON.parse),
-  ]);
-
+test("imported occupancy data contains valid, unique dates", async () => {
+  const availability = JSON.parse(await read("data/booking/availability.json"));
   for (const hall of ["event", "garden"]) {
     const dates = [...availability.locations[hall].blocked, ...availability.locations[hall].reserved];
     assert.equal(new Set(dates).size, dates.length, `${hall} enthält doppelte Termine`);
     for (const value of dates) {
       assert.match(value, /^\d{4}-\d{2}-\d{2}$/);
       const [year, month, day] = value.split("-").map(Number);
-      const parsed = new Date(Date.UTC(year, month - 1, day));
-      assert.equal(parsed.toISOString().slice(0, 10), value, `${value} ist kein gültiges Datum`);
+      assert.equal(new Date(Date.UTC(year, month - 1, day)).toISOString().slice(0, 10), value);
     }
-    assert.ok(pricing.halls[hall]);
-    assert.ok(pricing.locations[hall]);
   }
-  assert.match(pricing.settings.calendlyUrl, /^https:\/\/calendly\.com\//);
 });
 
-test("reservation and deletion logic preserve calendar integrity", async () => {
-  const [bookingRoute, deleteRoute] = await Promise.all([
-    read("app/api/buchung/route.ts"),
-    read("app/api/admin/requests/[id]/route.ts"),
+test("public booking API is read-only and exposes no pricing", async () => {
+  const route = await read("app/api/buchung/route.ts");
+  assert.match(route, /export async function GET/);
+  assert.doesNotMatch(route, /export async function POST/);
+  assert.doesNotMatch(route, /getBookingPricing|calculateTotal|booking_requests/);
+});
+
+test("consultation page embeds the configured Calendly calendar", async () => {
+  const [booking, publicCalendar] = await Promise.all([
+    read("app/buchung/page.tsx"),
+    read("app/belegungsplan/AvailabilityCalendar.tsx"),
   ]);
-
-  assert.match(bookingRoute, /consumeRateLimit\(request, "booking-submit"/);
-  assert.match(bookingRoute, /INSERT INTO booking_dates[^\n]+VALUES \(\?, \?, 'reserved', \?, 'customer'\)"/);
-  assert.doesNotMatch(bookingRoute, /DO UPDATE SET status = 'reserved'/);
-  assert.doesNotMatch(bookingRoute, /releaseExpiredReservations|RESERVATION_HOURS|expiresAt/);
-  assert.match(deleteRoute, /UPDATE booking_dates SET status = 'released'/);
-  assert.match(deleteRoute, /DELETE FROM booking_requests/);
+  assert.match(booking, /https:\/\/calendly\.com\/buchungen-ckeventcenter/);
+  assert.match(booking, /<iframe/);
+  assert.match(publicCalendar, /Nicht verfügbar/);
+  assert.doesNotMatch(publicCalendar, /Vorreservieren|reservieren/);
 });
 
-test("customer-facing legal pages contain operational information, not starter placeholders", async () => {
-  const [privacy, terms, imprint, booking] = await Promise.all([
+test("admin calendar stores optional customer details and notes", async () => {
+  const [admin, route, bookingDb] = await Promise.all([
+    read("public/verwaltung.html"),
+    read("app/api/admin/availability/route.ts"),
+    read("db/booking.ts"),
+  ]);
+  assert.match(admin, /customerName/);
+  assert.match(admin, /Interne Notiz/);
+  assert.doesNotMatch(admin, /Preise & Regeln|Konfigurator öffnen/);
+  assert.match(route, /booking_date_details/);
+  assert.match(bookingDb, /CREATE TABLE IF NOT EXISTS booking_date_details/);
+});
+
+test("legal and contact pages describe the current booking flow", async () => {
+  const [privacy, terms, contact] = await Promise.all([
     read("app/datenschutz/page.tsx"),
     read("app/agb/page.tsx"),
-    read("app/impressum/page.tsx"),
-    read("app/buchung/BookingConfigurator.tsx"),
+    read("app/kontakt/page.tsx"),
   ]);
-
-  assert.doesNotMatch(`${privacy}\n${terms}`, /Mustertext|vor der endgültigen Veröffentlichung|rechtlich vervollständigt/i);
   assert.match(privacy, /Calendly/);
-  assert.match(privacy, /manuell freigegeben/);
-  assert.match(terms, /unverbindliche Schätzungen/);
-  assert.match(imprint, /§ 5 DDG/);
-  assert.match(booking, /Datenschutzerklärung/);
+  assert.match(terms, /kein Hochzeitstermin reserviert/);
+  assert.match(contact, /Beratung buchen/);
+  assert.doesNotMatch(`${privacy}\n${terms}\n${contact}`, /Konfigurator|Preisschätzung/);
 });

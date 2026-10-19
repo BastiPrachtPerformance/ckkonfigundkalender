@@ -22,6 +22,13 @@
       "when": 1786945391993,
       "tag": "0002_peaceful_joshua_kane",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792397888484,
+      "tag": "0003_supreme_tinkerer",
+      "breakpoints": true
     }
   ]
 }
