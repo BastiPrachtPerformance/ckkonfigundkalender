@@ -15,6 +15,10 @@ test("build output and required public assets exist", async () => {
 
 test("imported occupancy data contains valid, unique dates", async () => {
   const availability = JSON.parse(await read("data/booking/availability.json"));
+  const expectedRangeCounts = {
+    event: { blocked: 63, reserved: 8 },
+    garden: { blocked: 91, reserved: 8 },
+  };
   for (const hall of ["event", "garden"]) {
     const dates = [...availability.locations[hall].blocked, ...availability.locations[hall].reserved];
     assert.equal(new Set(dates).size, dates.length, `${hall} enthält doppelte Termine`);
@@ -23,7 +27,15 @@ test("imported occupancy data contains valid, unique dates", async () => {
       const [year, month, day] = value.split("-").map(Number);
       assert.equal(new Date(Date.UTC(year, month - 1, day)).toISOString().slice(0, 10), value);
     }
+    for (const status of ["blocked", "reserved"]) {
+      const inScreenshotRange = availability.locations[hall][status].filter((date) => date >= "2026-10-19" && date <= "2027-09-30");
+      assert.equal(inScreenshotRange.length, expectedRangeCounts[hall][status]);
+    }
   }
+  assert.ok(availability.locations.event.reserved.includes("2026-10-23"));
+  assert.ok(availability.locations.garden.reserved.includes("2027-09-23"));
+  assert.ok(!availability.locations.event.blocked.includes("2026-10-26"));
+  assert.ok(!availability.locations.garden.blocked.includes("2026-10-19"));
 });
 
 test("public booking API is read-only and exposes no pricing", async () => {
