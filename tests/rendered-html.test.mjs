@@ -69,9 +69,9 @@ test("legal and contact pages describe the current booking flow", async () => {
   assert.doesNotMatch(`${privacy}\n${terms}\n${contact}`, /Konfigurator|Preisschätzung/);
 });
 
-test("site logos always return to the main CK Eventcenter homepage", async () => {
+test("site logos always return to the active domain root", async () => {
   const chrome = await read("app/_components/SiteChrome.tsx");
-  const homepageLinks = chrome.match(/href="https:\/\/www\.ckeventcenter\.de\/" target="_top"/g) ?? [];
+  const homepageLinks = chrome.match(/href="\/" target="_top"/g) ?? [];
   assert.equal(homepageLinks.length, 2);
-  assert.doesNotMatch(chrome, /className="brand" href="\/"/);
+  assert.doesNotMatch(chrome, /href="https:\/\/www\.ckeventcenter\.de\//);
 });
