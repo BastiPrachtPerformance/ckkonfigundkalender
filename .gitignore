@@ -43,5 +43,8 @@ yarn-error.log*
 /outputs/
 /work/
 /Buchung/
+/KonfigCKEVENTKalender/
+/server.log
+/server-err.log
 /.codex-remote-attachments/
 /preview.png
