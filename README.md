@@ -1,6 +1,6 @@
 # CK Eventcenter – Website, Belegungskalender und Verwaltung
 
-Die Anwendung enthält die öffentliche CK-Eventcenter-Website, den Hochzeitskonfigurator, den Belegungskalender und die geschützten Verwaltungsbereiche.
+Die Anwendung enthält die öffentliche CK-Eventcenter-Website, den Hochzeits-Belegungskalender, die Calendly-Beratung und die geschützten Verwaltungsbereiche.
 
 ## Wichtige Seiten
 
