@@ -3,8 +3,8 @@
   "settings": {
     "calendlyUrl": "https://calendly.com/buchungen-ckeventcenter",
     "bookingTitle": "Jetzt Beratungsgespräch buchen",
-    "bookingText": "Wählen Sie einen passenden Termin. Ihre Kontaktdaten werden automatisch an Calendly übergeben.",
-    "priceDisclaimer": "Unverbindliche Schätzung. Das finale Angebot erhalten Sie im Beratungsgespräch."
+    "bookingText": "Wählen Sie über Calendly einen passenden Termin für Ihr persönliches Beratungsgespräch.",
+    "priceDisclaimer": "Die konkrete Planung und das individuelle Angebot besprechen wir persönlich mit Ihnen."
   },
   "halls": {
     "event": {

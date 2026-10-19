@@ -429,7 +429,7 @@ em { font-weight: 400; }
   .page-curtain, .cursor-aura { display: none; }
 }
 
-/* Hochzeitskonfigurator */
+/* Buchungs- und Kalenderkomponenten */
 .configurator-page { min-height: 100vh; background: var(--paper); }
 .configurator-intro { position: relative; min-height: 510px; padding: 115px 7vw 90px; overflow: hidden; color: white; background: radial-gradient(circle at 78% 18%, rgba(201,167,95,.22), transparent 30%), linear-gradient(125deg, #07110d, #164b35); }
 .configurator-intro::after { content: "CK"; position: absolute; right: 2vw; bottom: -95px; color: transparent; -webkit-text-stroke: 1px rgba(228,205,146,.15); font: italic 360px/.7 var(--font-display); }

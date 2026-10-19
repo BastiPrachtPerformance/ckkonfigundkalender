@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ResponsiveImage } from "./ResponsiveImage";
 
 const mobileLinks = [
@@ -13,9 +12,9 @@ const mobileLinks = [
 export function Header({ solid = false }: { solid?: boolean }) {
   return (
     <header className={`site-header${solid ? " header-solid" : ""}`}>
-      <Link className="brand" href="/" aria-label="CK Eventcenter Startseite">
+      <a className="brand" href="https://www.ckeventcenter.de/" target="_top" aria-label="CK Eventcenter Startseite">
         <img className="brand-logo" src="/ck-eventcenter-logo.png" alt="" />
-      </Link>
+      </a>
       <nav className="desktop-nav" aria-label="Hauptnavigation">
         <details className="nav-dropdown">
           <summary>Säle <span>⌄</span></summary>
@@ -44,7 +43,7 @@ export function Footer() {
         <div><p>Prüfen Sie freie Hochzeitstermine und buchen Sie anschließend Ihr persönliches Beratungsgespräch.</p><a className="footer-booking-button" href="/buchung">Beratung buchen <span>↗</span></a></div>
       </div>
       <div className="footer-grid">
-        <div className="footer-identity"><Link className="brand footer-brand" href="/" aria-label="CK Eventcenter Startseite"><img className="brand-logo" src="/ck-eventcenter-logo.png" alt="" /></Link><p>Seit 2015 außergewöhnliche Hochzeiten und große Feiern in Bergkamen.</p></div>
+        <div className="footer-identity"><a className="brand footer-brand" href="https://www.ckeventcenter.de/" target="_top" aria-label="CK Eventcenter Startseite"><img className="brand-logo" src="/ck-eventcenter-logo.png" alt="" /></a><p>Seit 2015 außergewöhnliche Hochzeiten und große Feiern in Bergkamen.</p></div>
         <div className="footer-column"><span>Besuchen</span><address>Industriestraße 44a<br />59192 Bergkamen<br />Deutschland</address><a href="mailto:info@ckeventcenter.de">info@ckeventcenter.de ↗</a></div>
         <nav className="footer-column" aria-label="Säle und Angebot"><span>Entdecken</span><a href="/eventcenter">CK Eventcenter</a><a href="/garden">CK Garden</a><a href="/galerie">Galerie</a><a href="/belegungsplan">Termine</a><a href="/kontakt">Kontakt</a></nav>
         <nav className="footer-column" aria-label="Rechtliches"><span>Informationen</span><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/agb">AGB</a><a href="/barrierefreiheit">Barrierefreiheit</a></nav>
