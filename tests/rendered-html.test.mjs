@@ -75,3 +75,8 @@ test("site logos always return to the active domain root", async () => {
   assert.equal(homepageLinks.length, 2);
   assert.doesNotMatch(chrome, /href="https:\/\/www\.ckeventcenter\.de\//);
 });
+
+test("gallery image 11 is labeled CK Eventcenter", async () => {
+  const galleryPage = await read("app/galerie/page.tsx");
+  assert.match(galleryPage, /index === 10 \? "CK Eventcenter"/);
+});
