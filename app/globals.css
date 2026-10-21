@@ -758,3 +758,11 @@ em { font-weight: 400; }
   .keyuser-status, .keyuser-switch-card { padding: 22px 18px; }
   .keyuser-disable, .keyuser-enable { width: 100%; min-width: 0; }
 }
+
+.privacy-settings-button { padding: 0; border: 0; color: rgba(255,255,255,.48); background: transparent; font: inherit; font-size: 7px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+.privacy-settings-button:hover { color: white; }
+
+@media (max-width: 720px) {
+  .footer-bottom { flex-wrap: wrap; }
+  .privacy-settings-button { font-size: 7px; }
+}

@@ -92,7 +92,7 @@ export function AvailabilityCalendar() {
           <div className="availability-legend"><span><i className="free" />Frei</span><span><i className="unavailable" />Nicht verfügbar</span></div>
         </>}
       </div>
-      <div className="availability-cta"><div><p className="kicker">Ihr Wunschtermin ist frei?</p><h3>Dann lernen wir uns kennen.</h3></div><a className="solid-button" href="/buchung">Beratungsgespräch buchen <span>↗</span></a></div>
+      <div className="availability-cta"><div><p className="kicker">Ihr Wunschtermin ist frei?</p><h3>Dann lernen wir uns kennen.</h3></div><a className="solid-button" href="/buchung" data-pracht-event="anfrage">Beratungsgespräch buchen <span>↗</span></a></div>
     </section>
   );
 }

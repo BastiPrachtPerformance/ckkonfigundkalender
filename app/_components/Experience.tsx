@@ -212,7 +212,7 @@ export function Experience() {
       <canvas className="atmosphere-canvas" ref={atmosphere} aria-hidden="true" />
       <div className="cursor-aura" ref={cursor} aria-hidden="true" />
       <div className="page-curtain" ref={curtain} aria-hidden="true"><span>CK</span></div>
-      <a className="floating-book" href="/buchung"><span>Buchen</span><b>↗</b></a>
+      <a className="floating-book" href="/buchung" data-pracht-event="anfrage"><span>Buchen</span><b>↗</b></a>
     </>
   );
 }

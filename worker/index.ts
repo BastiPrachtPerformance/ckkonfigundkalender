@@ -46,7 +46,7 @@ function withSecurityHeaders(response: Response) {
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
   headers.set("X-Frame-Options", "SAMEORIGIN");
-  headers.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://static.wixstatic.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; frame-src https://calendly.com https://*.calendly.com; object-src 'none'; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self'; upgrade-insecure-requests");
+  headers.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' https://control.pracht-performance.de; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://static.wixstatic.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; frame-src https://calendly.com https://*.calendly.com; object-src 'none'; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self'; upgrade-insecure-requests");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 

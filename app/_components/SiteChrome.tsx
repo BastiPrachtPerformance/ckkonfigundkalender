@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ResponsiveImage } from "./ResponsiveImage";
+import { PrachtAnalyticsPrivacyControl } from "./PrachtAnalyticsTracker";
 
 const mobileLinks = [
   ["/eventcenter", "Eventcenter"],
@@ -24,12 +25,12 @@ export function Header({ solid = false }: { solid?: boolean }) {
         <a href="/galerie">Galerie</a>
         <a href="/belegungsplan">Termine</a>
         <a href="/kontakt">Kontakt</a>
-        <a className="nav-cta" href="/buchung">Beratung buchen <span>↗</span></a>
+        <a className="nav-cta" href="/buchung" data-pracht-event="anfrage">Beratung buchen <span>↗</span></a>
       </nav>
       <details className="mobile-menu">
         <summary aria-label="Menü öffnen"><span>Menü</span><b>＋</b></summary>
         <nav aria-label="Mobile Navigation">
-          {mobileLinks.map(([href, label], index) => <a href={href} key={href}><small>0{index + 1}</small>{label}</a>)}
+          {mobileLinks.map(([href, label], index) => <a href={href} key={href} data-pracht-event={href === "/buchung" ? "anfrage" : undefined}><small>0{index + 1}</small>{label}</a>)}
         </nav>
       </details>
     </header>
@@ -41,7 +42,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-booking-teaser">
         <div><p className="kicker">Ihr Fest beginnt hier</p><h2>Ein Datum.<br /><em>Ein Versprechen.</em></h2></div>
-        <div><p>Prüfen Sie freie Hochzeitstermine und buchen Sie anschließend Ihr persönliches Beratungsgespräch.</p><a className="footer-booking-button" href="/buchung">Beratung buchen <span>↗</span></a></div>
+        <div><p>Prüfen Sie freie Hochzeitstermine und buchen Sie anschließend Ihr persönliches Beratungsgespräch.</p><a className="footer-booking-button" href="/buchung" data-pracht-event="anfrage">Beratung buchen <span>↗</span></a></div>
       </div>
       <div className="footer-grid">
         <div className="footer-identity"><Link className="brand footer-brand" href="/" target="_top" aria-label="CK Eventcenter Startseite"><img className="brand-logo" src="/ck-eventcenter-logo.png" alt="" /></Link><p>Seit 2015 außergewöhnliche Hochzeiten und große Feiern in Bergkamen.</p></div>
@@ -49,7 +50,7 @@ export function Footer() {
         <nav className="footer-column" aria-label="Säle und Angebot"><span>Entdecken</span><a href="/eventcenter">CK Eventcenter</a><a href="/garden">CK Garden</a><a href="/galerie">Galerie</a><a href="/belegungsplan">Termine</a><a href="/kontakt">Kontakt</a></nav>
         <nav className="footer-column" aria-label="Rechtliches"><span>Informationen</span><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/agb">AGB</a><a href="/barrierefreiheit">Barrierefreiheit</a></nav>
       </div>
-      <div className="footer-bottom"><span>© {new Date().getFullYear()} CK Eventcenter</span><span>Mit Liebe für besondere Augenblicke.</span><a href="#top">Nach oben ↑</a></div>
+      <div className="footer-bottom"><span>© {new Date().getFullYear()} CK Eventcenter</span><span>Mit Liebe für besondere Augenblicke.</span><PrachtAnalyticsPrivacyControl /><a href="/datenschutz#statistik">Datenschutz</a><a href="#top">Nach oben ↑</a></div>
     </footer>
   );
 }

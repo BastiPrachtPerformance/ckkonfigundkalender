@@ -15,7 +15,7 @@ export default function Home() {
           <h1>Ein Ort für<br /><em>das Unvergessliche.</em></h1>
           <div className="hero-meta">
             <p>Hochzeiten. Große Feiern.<br />Momente, die bleiben.</p>
-            <a className="line-button light" href="/buchung">Gespräch vereinbaren <span>↗</span></a>
+            <a className="line-button light" href="/buchung" data-pracht-event="anfrage">Gespräch vereinbaren <span>↗</span></a>
           </div>
         </div>
         <div className="hero-side-note"><span>Seit</span><b>2015</b><span>Bergkamen</span></div>
@@ -61,7 +61,7 @@ export default function Home() {
       <section className="date-cta">
         <ResponsiveImage src={images.eventDark} alt="Abendliche Atmosphäre im CK Eventcenter" sizes="100vw" />
         <div className="date-overlay" />
-        <div className="date-copy"><p className="section-label light">03 / Wunschtermin prüfen</p><h2>Ihr großer Tag<br />verdient den <em>richtigen Ort.</em></h2><div><a className="solid-button gold" href="/belegungsplan">Wunschtermin prüfen <span>↗</span></a><a className="line-button light" href="/buchung">Beratungsgespräch buchen <span>↗</span></a></div></div>
+        <div className="date-copy"><p className="section-label light">03 / Wunschtermin prüfen</p><h2>Ihr großer Tag<br />verdient den <em>richtigen Ort.</em></h2><div><a className="solid-button gold" href="/belegungsplan" data-pracht-event="anfrage">Wunschtermin prüfen <span>↗</span></a><a className="line-button light" href="/buchung" data-pracht-event="anfrage">Beratungsgespräch buchen <span>↗</span></a></div></div>
       </section>
 
       <Footer />
