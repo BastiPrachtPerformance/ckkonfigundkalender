@@ -52,8 +52,10 @@ test("consultation page embeds the configured Calendly calendar", async () => {
   ]);
   assert.match(booking, /https:\/\/calendly\.com\/buchungen-ckeventcenter/);
   assert.match(booking, /<iframe/);
-  assert.match(publicCalendar, /Nicht verfügbar/);
-  assert.doesNotMatch(publicCalendar, /Vorreservieren|reservieren/);
+  assert.match(publicCalendar, /statusByDate/);
+  assert.match(publicCalendar, /status === "reserved" \? "reserved"/);
+  assert.match(publicCalendar, /Reserviert/);
+  assert.match(publicCalendar, /Belegt/);
 });
 
 test("admin calendar stores optional customer details and notes", async () => {

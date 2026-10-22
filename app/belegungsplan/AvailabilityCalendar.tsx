@@ -58,7 +58,9 @@ export function AvailabilityCalendar() {
   const monthIndex = month.getMonth();
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
   const leading = (new Date(year, monthIndex, 1).getDay() + 6) % 7;
-  const busy = new Set(dates.filter((entry) => entry.location === hall).map((entry) => entry.date));
+  const statusByDate = new Map(
+    dates.filter((entry) => entry.location === hall).map((entry) => [entry.date, entry.status]),
+  );
   const currentMonth = today.getFullYear() === year && today.getMonth() === monthIndex;
   const monthLabel = new Intl.DateTimeFormat("de-DE", { month: "long", year: "numeric" }).format(month);
 
@@ -85,11 +87,15 @@ export function AvailabilityCalendar() {
               const day = index + 1;
               const key = dateKey(year, monthIndex, day);
               const past = new Date(year, monthIndex, day, 23, 59, 59) < today;
-              const unavailable = loading || past || busy.has(key);
-              return <div key={key} className={`availability-day ${past ? "past" : unavailable ? "unavailable" : "free"}`} aria-label={`${day}. ${monthLabel}: ${unavailable ? "nicht verfügbar" : "frei"}`}><strong>{day}</strong><small>{past ? "vorbei" : unavailable ? "belegt" : "frei"}</small></div>;
+              const status = statusByDate.get(key);
+              const state = past ? "past" : status === "reserved" ? "reserved" : status ? "unavailable" : "free";
+              const label = past ? "vorbei" : status === "reserved" ? "reserviert" : status ? "belegt" : "frei";
+              const visibleLabel = loading && !past ? "lädt …" : label;
+              const accessibleLabel = loading && !past ? "wird geladen" : label;
+              return <div key={key} className={`availability-day ${state}${loading && !past ? " loading" : ""}`} aria-label={`${day}. ${monthLabel}: ${accessibleLabel}`}><strong>{day}</strong><small>{visibleLabel}</small></div>;
             })}
           </div>
-          <div className="availability-legend"><span><i className="free" />Frei</span><span><i className="unavailable" />Nicht verfügbar</span></div>
+          <div className="availability-legend"><span><i className="free" />Frei</span><span><i className="reserved" />Reserviert</span><span><i className="unavailable" />Belegt</span></div>
         </>}
       </div>
       <div className="availability-cta"><div><p className="kicker">Ihr Wunschtermin ist frei?</p><h3>Dann lernen wir uns kennen.</h3></div><a className="solid-button" href="/buchung" data-pracht-event="anfrage">Beratungsgespräch buchen <span>↗</span></a></div>

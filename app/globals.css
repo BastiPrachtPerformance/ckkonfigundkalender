@@ -620,12 +620,16 @@ em { font-weight: 400; }
 .availability-day small { margin-top: 25px; font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .availability-day.free { border-color: rgba(30,110,72,.25); background: #edf5ef; }
 .availability-day.free small { color: #28754e; }
+.availability-day.reserved { color: #856319; border-color: rgba(163,125,36,.3); background: #fbf1d7; }
+.availability-day.reserved small { color: #8d6b1a; }
 .availability-day.unavailable { color: #88514a; border-color: rgba(139,62,52,.22); background: #f6eae7; }
+.availability-day.loading { border-style: dashed; }
 .availability-day.past { color: #93968f; border-color: transparent; background: #efeee9; opacity: .65; }
 .availability-legend { display: flex; justify-content: center; gap: 28px; margin-top: 28px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
 .availability-legend span { display: flex; align-items: center; gap: 8px; }
 .availability-legend i { width: 11px; height: 11px; border-radius: 50%; }
 .availability-legend i.free { background: #8fb99f; }
+.availability-legend i.reserved { background: #d8b768; }
 .availability-legend i.unavailable { background: #c38d84; }
 .availability-error { padding: 65px 20px; color: var(--muted); text-align: center; }
 .availability-error button { margin-top: 16px; padding: 12px 18px; border: 0; color: white; background: var(--green); }
