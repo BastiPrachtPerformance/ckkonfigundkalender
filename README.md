@@ -11,7 +11,9 @@ Die Anwendung enthält die öffentliche CK-Eventcenter-Website, den Hochzeits-Be
 
 ## Betrieb
 
-Die strukturierten Daten werden in der über `.openai/hosting.json` angebundenen D1-Datenbank gespeichert. Netlify dient als vorgeschaltete Domain und leitet die Requests an die veröffentlichte Anwendung weiter.
+Die strukturierten Daten werden in der über `.openai/hosting.json` angebundenen D1-Datenbank gespeichert. Netlify liefert die Admin-Kalenderoberfläche unter `/verwaltung`, `/verwaltung/` und `/verwaltung.html` direkt aus diesem Repository aus. Beim Build kopiert `build/prepare-netlify.mjs` dafür `public/verwaltung.html` in das Netlify-Veröffentlichungsverzeichnis.
+
+Alle übrigen Seiten und die bestehenden `/api/`-Endpunkte werden weiterhin an die veröffentlichte Anwendung weitergeleitet. Die Datenbank, Zugangsdaten und gespeicherten Termine werden durch einen Deploy der Admin-Oberfläche nicht ersetzt oder migriert. Die gezielten Admin-Regeln müssen in `netlify.toml` vor der allgemeinen Proxy-Regel stehen.
 
 Erforderliche Laufzeitvariablen:
 

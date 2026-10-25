@@ -48,3 +48,4 @@ yarn-error.log*
 /server-err.log
 /.codex-remote-attachments/
 /preview.png
+/netlify/admin-calendar.html

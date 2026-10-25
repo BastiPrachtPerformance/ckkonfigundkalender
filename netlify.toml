@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npm run build && node build/prepare-netlify.mjs"
   publish = "netlify"
 
 [build.environment]
@@ -13,6 +13,31 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
     X-Frame-Options = "SAMEORIGIN"
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://control.pracht-performance.de; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://static.wixstatic.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; frame-src https://calendly.com https://*.calendly.com; object-src 'none'; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self'; upgrade-insecure-requests"
+
+[[headers]]
+  for = "/verwaltung*"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+# Serve the admin UI from this GitHub deploy. Its existing same-origin API
+# requests continue through the proxy below to the unchanged database.
+[[redirects]]
+  from = "/verwaltung"
+  to = "/admin-calendar.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/verwaltung/"
+  to = "/admin-calendar.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/verwaltung.html"
+  to = "/admin-calendar.html"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
